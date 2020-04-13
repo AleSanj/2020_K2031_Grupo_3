@@ -50,7 +50,7 @@ int main()
                 }
                 else
                 {
-                    printf("palabra reconocida");
+                    printf("es un nro decimal");
                 }
 
                 break;
