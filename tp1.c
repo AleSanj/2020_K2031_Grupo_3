@@ -37,6 +37,7 @@ int main()
         {
              for(int i=0;i<=6;i++)
                 {
+<<<<<<< HEAD
                     if(estado==i)
                     {
                         for(int j=0;j<=5;j++)
@@ -47,6 +48,47 @@ int main()
                         estado=TT[i][j];    //a estado le asigno el estado q le sigue
                         j=9;     // para que finalice el for
                           }
+=======
+                    printf("es un nro decimal");
+                }
+
+                break;
+                case ESTADO2: if(nro=='x' || nro=='X')
+                {
+                    estado=ESTADO3;
+                }
+                else if(nro<=7)
+                {
+                    estado=ESTADO5;
+                }
+                else
+                {
+                    estado=ERROR;
+                }
+                break;
+                case ESTADO3;
+                int i=0;
+                while(nro!=letras[i] && i<13)
+                {
+                    i++;
+                }
+                if(nro==letras[i] || nro<=9)
+                {
+                    estado=ESTADO4;
+                }
+                else
+                {
+                    estado=ERROR;
+                }
+                break;
+                case ESTADO4:
+                int i=0;
+               while(nro!=delimitador || estado!=ERROR){
+                while(nro!=letras[i] && i<13)
+                {
+                    i++;
+                }
+>>>>>>> 0f7256e7d726222f8c374ef92e467344a4efa9fe
 
                        }
                      i=9;   //para que finalice el for
