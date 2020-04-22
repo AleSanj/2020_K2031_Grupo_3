@@ -159,6 +159,11 @@ int posCol (char numero) {
       			fwrite(&str,sizeof(char),sizeof(str),archivo);
       		 }
 		break;
+		case 3:{
+      			char str[] = "No reconocida,";
+      			fwrite(&str,sizeof(char),sizeof(str),archivo);
+      			}
+		break;
 	
 		case 4:
 			   {
