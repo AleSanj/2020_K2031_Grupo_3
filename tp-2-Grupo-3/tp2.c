@@ -40,7 +40,7 @@ while ( ESTADO_ACTUAL != 3 && cadena!="/0" ){
 char caracter;
 caracter=pop(&pila);
 push(&pila,caracter);
-  a = matriz  [posCol(cadena[i])][ESTADO_ACTUAL][cimapila(caracter)] ;
+  a = matriz  [ESTADO_ACTUAL][cimapila(caracter)][posCol(cadena[i])] ;
 
   ESTADO_ACTUAL= a.Estado_sig;
 
