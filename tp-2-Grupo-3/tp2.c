@@ -51,40 +51,38 @@ char car;
  while ( ESTADO_ACTUAL != 3 && cadena[i]!='\0' )
  { 
     caracter=pop(&pila); //para pasarselo a cimapila
-    //push(&pila,caracter);
+    
     a = matriz  [ESTADO_ACTUAL][cimapila(caracter)][posCol(cadena[i])] ;
 
     ESTADO_ACTUAL= a.Estado_sig;
-  
-     if(a.cadpush[0]=='$')
+    
+    if(a.cadpush[0]=='$' && a.cadpush[1]=='\0')
     {push(&pila,a.cadpush[0]);
-    //printf("cero if");
     }
-    else if(a.cadpush[0]=='R'){
+    else if(a.cadpush[0]=='R' && a.cadpush[1]=='\0'){
       push(&pila,a.cadpush[0]);
-      //printf("1er if");
     }
-   else if(strcmp(a.cadpush,"R$")) //compara si son iguales,entra
+    
+    if(strcmp(a.cadpush,"R$")==0) //compara si son iguales,entra
     {
       push(&pila,a.cadpush[1]);
       push(&pila,a.cadpush[0]); //se abre parentesis
-      //printf("2do if\n");
     }
-    else if(strcmp(a.cadpush,"RR"))
+    else if(strcmp(a.cadpush,"RR")==0)
     {
       push(&pila,a.cadpush[1]);
       push(&pila,a.cadpush[0]);
-       //se abre parentesis
-       //printf("3ro if\n");
     }
+    
     
    i++;
   }
+  
   car=pop(&pila);
   if(ESTADO_ACTUAL!=3){
   if(car=='R')
   {
-    printf("el error es que falta cerrar parentesis\n");
+    printf("falta cerrar parentesis\n");
     ESTADO_ACTUAL=3;
   }}
   sintaxis(ESTADO_ACTUAL,car,cadena);
@@ -176,7 +174,6 @@ void push(struct Nodo **topePtr, char info)
    }
    else
 	  printf("%d no insertado. No hay memoria disponile.\n", info);
-//printf("push%c ",info);
 }
 
 /* Eliminar un nodo de la pila */
@@ -189,7 +186,6 @@ char pop(struct Nodo **topePtr)
    caracter = (*topePtr)->dato;
    *topePtr = (*topePtr)->sig;
    free(tempPtr);
-   //printf("pop%c ",caracter);
    return caracter;
 }
 
