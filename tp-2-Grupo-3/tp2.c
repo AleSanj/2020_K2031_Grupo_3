@@ -51,39 +51,46 @@ char car;
  while ( ESTADO_ACTUAL != 3 && cadena[i]!='\0' )
  { 
     caracter=pop(&pila); //para pasarselo a cimapila
-    push(&pila,caracter);
+    //push(&pila,caracter);
     a = matriz  [ESTADO_ACTUAL][cimapila(caracter)][posCol(cadena[i])] ;
 
     ESTADO_ACTUAL= a.Estado_sig;
   
-    if(a.cadpush[0]=='E')
-    { 
-      a.cadpush[0]='R';
-      car=pop(&pila); //con epsilon se cierra un parentesis
+     if(a.cadpush[0]=='$')
+    {push(&pila,a.cadpush[0]);
+    //printf("cero if");
     }
-    if(strcmp(a.cadpush,"R$")) //compara si son iguales,entra
-    {
-      push(&pila,a.cadpush[0]); //se abre parentesis
-    }
-    if(strcmp(a.cadpush,"RR"))
-    {
-      push(&pila,a.cadpush[0]); //se abre parentesis
-    }
-    if(strcmp(a.cadpush,"R"))
-    {
+    else if(a.cadpush[0]=='R'){
       push(&pila,a.cadpush[0]);
+      //printf("1er if");
+    }
+   else if(strcmp(a.cadpush,"R$")) //compara si son iguales,entra
+    {
+      push(&pila,a.cadpush[1]);
+      push(&pila,a.cadpush[0]); //se abre parentesis
+      //printf("2do if\n");
+    }
+    else if(strcmp(a.cadpush,"RR"))
+    {
+      push(&pila,a.cadpush[1]);
+      push(&pila,a.cadpush[0]);
+       //se abre parentesis
+       //printf("3ro if\n");
     }
     
    i++;
   }
-  if(pop(&pila)=='R')
+  car=pop(&pila);
+  if(ESTADO_ACTUAL!=3){
+  if(car=='R')
   {
+    printf("el error es que falta cerrar parentesis\n");
     ESTADO_ACTUAL=3;
-  }
+  }}
   sintaxis(ESTADO_ACTUAL,car,cadena);
   if(ESTADO_ACTUAL==3 || ESTADO_ACTUAL==0)
-  { if(pop(&pila)=='R')
-    printf("el error es que le falta cerrar parentesis\n");
+  {if(car=='R')
+    printf("el error se encontro despues del %c, caracter en posicion %i\n",cadena[i-1],i);
     else
     printf("el error se encontro en %c, caracter en posicion %i\n",cadena[i-1],i);
   }
@@ -169,6 +176,7 @@ void push(struct Nodo **topePtr, char info)
    }
    else
 	  printf("%d no insertado. No hay memoria disponile.\n", info);
+//printf("push%c ",info);
 }
 
 /* Eliminar un nodo de la pila */
@@ -181,7 +189,7 @@ char pop(struct Nodo **topePtr)
    caracter = (*topePtr)->dato;
    *topePtr = (*topePtr)->sig;
    free(tempPtr);
-   
+   //printf("pop%c ",caracter);
    return caracter;
 }
 
@@ -195,12 +203,11 @@ switch(estado){
   {
     printf("La cadena %s es sintacticamente correcta\n",cadena);
   }
-  else
-    printf("La cadena %s es sintacticamente incorrecta\n",cadena); 
   break;
   case 0:
   case 3:
     printf("La cadena %s es sintacticamente incorrecta\n",cadena); 
+    
   break;
   }
 }
