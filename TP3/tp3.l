@@ -2,6 +2,8 @@
 
 %{
     #include <stdio.h>
+
+    //agregue insertar y buscar  para lista de dentificadores (PD no se si esta bien)
 %}
 
 
@@ -28,12 +30,30 @@ COMENTARIOS ("//".*)|("/*"(\n|.)*"*/")
 {LITERAL_CADENA} {printf("Se encontre el literal cadena: %s \n", yytext);}
 {PALABRAS_RESERVADAS} {printf("encontre una palabra reservada : %s \n", yytext);}
 {CARACTER_SIMPLE} {printf("encontre el caracter: %s \n", yytext);}
-{IDENTIFICADOR} {printf("encontre un identificador: %s \n", yytext);}
+{IDENTIFICADOR} {printf("encontre un identificador: %s \n", yytext); i.identificador=yytext;
+ i.vecesQAparece=1; insertar(i,lista); ordenar(lista);}
 {DIRECTIVAALPRECOMPILADOR} {printf("Encontre la directiva al precompilador: %s \n ",yytext);}
 {CARACTER_DE_PUNTUACION} {printf("encontre el caracter de puntuacion: %s \n", yytext);}
 {OPERADOR}/{NUMERO} {printf("encontre el operador: %s \n", yytext);}
 
 %%
+struct Id
+{
+    char identificador[50];
+    int vecesQAparece;
+}i;
+
+struct Nodo
+{
+    struct Id info;
+    struct Nodo*sig;
+};
+
+
+void insertar(struct Id n,struct Nodo*lista);
+void buscar(struct Nodo*lista,struct Id n.identificador); 
+void ordenar(struct Nodo*lista);
+void listar(struct Nodo*lista);
 
 
 int main(){
@@ -41,9 +61,37 @@ int main(){
     yyin = fopen("entrada.c" , "r");
     yyout = fopen("salida.c" , "w");
     yylex();
-
- 
+    struct Nodo*lista=NULL;
     
 
     return 0;
+}
+
+void insertar(struct Id n,struct Nodo*lista)
+{
+    struct Nodo*nuevo=(struct Nodo*) malloc(sizeof(struct Nodo));
+    struct Nodo*p=buscar(lista,n.identificador);
+    nuevo->info=n;
+    if(nuevo->info.identificador!=p->info.identificador){
+        nuevo->sig=lista;
+        lista=nuevo;
+    }
+    else
+        p->info.vecesQAparece+=nuevo->info.vecesQAparece;   
+    
+}
+
+buscar(struct Nodo*lista,struct Id n.identificador)
+{
+    Nodo p*=lista;
+    while(p!=NULL && p->info.identificador!=n.identificador)
+    {
+        p=p->sig;
+    }
+    if(p!=NULL && p->info.identificador==n.identificador)
+    {
+        return p;
+    }
+    else
+        return NULL;
 }
