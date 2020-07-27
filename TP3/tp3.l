@@ -2,7 +2,23 @@
 
 %{
     #include <stdio.h>
+struct Id
+{
+    char identificador[50];
+    int vecesQAparece;
+}i;
 
+struct Nodo
+{
+    struct Id info;
+    struct Nodo*sig;
+};
+
+
+void insertar(struct Id n,struct Nodo*lista);
+void buscar(struct Nodo*lista,struct Id n.identificador); 
+void ordenar(struct Nodo*lista);
+void listar(struct Nodo*lista);
     //agregue insertar y buscar  para lista de dentificadores (PD no se si esta bien)
 %}
 
@@ -37,23 +53,7 @@ COMENTARIOS ("//".*)|("/*"(\n|.)*"*/")
 {OPERADOR}/{NUMERO} {printf("encontre el operador: %s \n", yytext);}
 
 %%
-struct Id
-{
-    char identificador[50];
-    int vecesQAparece;
-}i;
 
-struct Nodo
-{
-    struct Id info;
-    struct Nodo*sig;
-};
-
-
-void insertar(struct Id n,struct Nodo*lista);
-void buscar(struct Nodo*lista,struct Id n.identificador); 
-void ordenar(struct Nodo*lista);
-void listar(struct Nodo*lista);
 
 
 int main(){
