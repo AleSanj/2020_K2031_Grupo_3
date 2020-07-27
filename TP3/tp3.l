@@ -13,10 +13,10 @@ struct Nodo
     struct Id info;
     struct Nodo*sig;
 };
-
+ struct Nodo*lista=NULL;
 
 void insertar(struct Id n,struct Nodo*lista);
-void buscar(struct Nodo*lista,struct Id n.identificador); 
+struct Nodo* buscar(struct Nodo*lista,struct Id n); 
 void ordenar(struct Nodo*lista);
 void listar(struct Nodo*lista);
     //agregue insertar y buscar  para lista de dentificadores (PD no se si esta bien)
@@ -61,7 +61,7 @@ int main(){
     yyin = fopen("entrada.c" , "r");
     yyout = fopen("salida.c" , "w");
     yylex();
-    struct Nodo*lista=NULL;
+   
     
 
     return 0;
@@ -70,7 +70,7 @@ int main(){
 void insertar(struct Id n,struct Nodo*lista)
 {
     struct Nodo*nuevo=(struct Nodo*) malloc(sizeof(struct Nodo));
-    struct Nodo*p=buscar(lista,n.identificador);
+    struct Nodo*p=buscar(lista,n);
     nuevo->info=n;
     if(nuevo->info.identificador!=p->info.identificador){
         nuevo->sig=lista;
@@ -81,9 +81,9 @@ void insertar(struct Id n,struct Nodo*lista)
     
 }
 
-buscar(struct Nodo*lista,struct Id n.identificador)
+struct Nodo* buscar(struct Nodo*lista,struct Id n)
 {
-    Nodo p*=lista;
+    struct Nodo *p=lista;
     while(p!=NULL && p->info.identificador!=n.identificador)
     {
         p=p->sig;
