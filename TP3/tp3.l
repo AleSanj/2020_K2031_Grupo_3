@@ -1,28 +1,5 @@
 %option noyywrap
 
-%{
-    #include <stdio.h>
-struct Id
-{
-    char identificador[50];
-    int vecesQAparece;
-}i;
-
-struct Nodo
-{
-    struct Id info;
-    struct Nodo*sig;
-};
- struct Nodo*lista=NULL;
-
-void insertar(struct Id n,struct Nodo*lista);
-struct Nodo* buscar(struct Nodo*lista,struct Id n); 
-void ordenar(struct Nodo*lista);
-void listar(struct Nodo*lista);
-    //agregue insertar y buscar  para lista de dentificadores (PD no se si esta bien)
-%}
-
-
 PALABRAS_RESERVADAS auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while
 CARACTER_DE_PUNTUACION "("|")"|"["|"]"|"{"|"}"|"*"|","|":"|"="|";"|"..."|"#"
 CONSTANTE_DECIMAL [1-9][0-9]*
@@ -35,9 +12,37 @@ IDENTIFICADOR ([a-zA-Z]|_)([a-zA-Z]|[0-9]|_)*
 OPERADOR "+"|"-"|"/"|"*"|"%"|"&&"|"||"|"¬"|">"|">="|"<"|"<="|"=="|"!="
 NUMERO [0-9]
 DIRECTIVAALPRECOMPILADOR "#"(define|elif|else|endif|error|if|ifdef|ifndef|include|message|undef)
-COMENTARIOS ("//".*)|("/*"(\n|.)*"*/")
+COMENTARIOS ("//".*)|"/*"([^*/"]|"/*")*"*/"
+%{
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+
+   typedef struct Nodo {
+    char *Palabra;
+    struct Nodo* sgte;
+}NODO;
+
+
+NODO* CrearNodo(char*);
+void RecorrerLista(NODO*);
+int VerificarSiEstaVacia(NODO*);
+int EstaElElemento(NODO*, char*);
+void InsertarAlPpio(NODO** l, char* palabra);
+void insertarOrdenado(NODO**, char*);
+
+    NODO* listaIdentificadores = NULL;
+    int contadorIdentificadores = 0;
+
+
+    
+%}
 
 %%
+%{
+    
+    char *ids;
+%}
 {COMENTARIOS} {printf("Encontre el comentario : %s \n",yytext);}
 {CONSTANTE_DECIMAL} {printf("Encontre una constante decimal : %s \n" , yytext);}
 {CONSTANTE_OCTAL} {printf("Encontre una constante octal : %s \n" , yytext);}
@@ -46,8 +51,28 @@ COMENTARIOS ("//".*)|("/*"(\n|.)*"*/")
 {LITERAL_CADENA} {printf("Se encontre el literal cadena: %s \n", yytext);}
 {PALABRAS_RESERVADAS} {printf("encontre una palabra reservada : %s \n", yytext);}
 {CARACTER_SIMPLE} {printf("encontre el caracter: %s \n", yytext);}
-{IDENTIFICADOR} {printf("encontre un identificador: %s \n", yytext); i.identificador=yytext;
- i.vecesQAparece=1; insertar(i,lista); ordenar(lista);}
+{IDENTIFICADOR} {
+                    fflush(stdin);
+                    strcpy(ids,yytext);
+                    // printf("\n%s",ids);
+                    // insertarOrdenado(&listaIdentificadores,"identificador");
+                    // insertarOrdenado(&listaIdentificadores,"da");
+                    if (VerificarSiEstaVacia(listaIdentificadores)==1){
+                        InsertarAlPpio(&listaIdentificadores,ids);
+                        contadorIdentificadores++;
+                        printf(" VERIFICADOR1  %s\n",ids);
+
+                    } else if(EstaElElemento(listaIdentificadores,ids)==0) {
+                        printf(" VERIFICADOR3 %s\n",ids);
+                        insertarOrdenado(&listaIdentificadores,ids);
+                        contadorIdentificadores++;
+                        
+                    } else {
+                        contadorIdentificadores++;
+                        printf(" VERIFICADOR2 %s\n",ids);
+                    }
+                    
+ }
 {DIRECTIVAALPRECOMPILADOR} {printf("Encontre la directiva al precompilador: %s \n ",yytext);}
 {CARACTER_DE_PUNTUACION} {printf("encontre el caracter de puntuacion: %s \n", yytext);}
 {OPERADOR}/{NUMERO} {printf("encontre el operador: %s \n", yytext);}
@@ -55,43 +80,86 @@ COMENTARIOS ("//".*)|("/*"(\n|.)*"*/")
 %%
 
 
-
 int main(){
-
-    yyin = fopen("entrada.c" , "r");
-    yyout = fopen("salida.c" , "w");
+    
+    yyin = fopen("entrada.txt" , "r");
+    yyout = fopen("salida.txt" , "w");
     yylex();
-   
+
+   	if (VerificarSiEstaVacia(listaIdentificadores) == 0 ) {
+           printf("Se encontraron %d identificadores\n Lista de identificadores: \n",contadorIdentificadores);
+           RecorrerLista(listaIdentificadores);
+       } else {
+           printf("La lista esta vacia");
+       }
     
 
     return 0;
 }
 
-void insertar(struct Id n,struct Nodo*lista)
-{
-    struct Nodo*nuevo=(struct Nodo*) malloc(sizeof(struct Nodo));
-    struct Nodo*p=buscar(lista,n);
-    nuevo->info=n;
-    if(nuevo->info.identificador!=p->info.identificador){
-        nuevo->sig=lista;
-        lista=nuevo;
-    }
-    else
-        p->info.vecesQAparece+=nuevo->info.vecesQAparece;   
-    
+NODO* CrearNodo(char* palabra) {
+    NODO* nuevo_nodo = NULL;
+    nuevo_nodo = (NODO*) malloc(sizeof(NODO));
+    nuevo_nodo->Palabra= palabra;
+    nuevo_nodo->sgte = NULL;    
 }
 
-struct Nodo* buscar(struct Nodo*lista,struct Id n)
-{
-    struct Nodo *p=lista;
-    while(p!=NULL && p->info.identificador!=n.identificador)
-    {
-        p=p->sig;
+void RecorrerLista(NODO *l) {
+    NODO *aux = l;
+    while (aux != NULL) {
+        printf("%s \n",aux->Palabra);
+        aux = aux->sgte; 
     }
-    if(p!=NULL && p->info.identificador==n.identificador)
-    {
-        return p;
+}
+
+int VerificarSiEstaVacia(NODO* l){
+if (l == NULL){
+    return 1;
+} else {
+    return 0;
+}
+}
+void InsertarAlPpio(NODO** l, char* palabra){
+    NODO* nuevo_nodo = NULL;
+    nuevo_nodo = CrearNodo(palabra);
+    nuevo_nodo->sgte = *l;
+    *l = nuevo_nodo;
+
+}
+
+void insertarOrdenado(NODO** l, char* palabra){
+    NODO* aux1 = *l; 
+    if(VerificarSiEstaVacia(aux1) == 1 || strcmp(palabra,aux1->Palabra)<0) {
+        InsertarAlPpio(l,palabra);
+
+    } 
+    else {
+            NODO* aux2 = aux1->sgte;
+        while(aux1->sgte != NULL && (strcmp(palabra,aux1->sgte->Palabra)>0)) {
+            aux1 = aux1->sgte;
+            aux2 = aux2->sgte;
+        }
+        NODO* nuevo_nodo = NULL;
+        nuevo_nodo = CrearNodo(palabra);
+        nuevo_nodo->sgte = aux2;
+        aux1->sgte = nuevo_nodo;
+
     }
-    else
-        return NULL;
+}
+
+int EstaElElemento(NODO*l, char* palabra){
+    NODO* aux = l;
+    
+    if (VerificarSiEstaVacia(l) != 1){
+        do {
+            if(strcmp(aux->Palabra,palabra) == 0){
+                return 1;
+            
+            } 
+            aux = aux->sgte;
+        }
+        while (aux != NULL);
+        
+        return 0;
+    } return 0;
 }
