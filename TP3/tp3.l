@@ -51,14 +51,21 @@ int EstaElElemento(NODO*, char[]);
 void InsertarAlPpio(NODO** l, char[]);
 void insertarIdentOrdenado(NODO**, char[]);
 
+void insertarAlFinal(NODO**,char[]);
+void recorrerListaPalReserv(NODO*);
+
     
 %}
 
 %{
     char ids[20];
+    char palR[20];
     // char* ids;
     NODO* listaIdentificadores = NULL;
     int contadorIdentificadores = 0;
+
+    NODO* listaPalReserv = NULL;
+
 %}
 
 %%
@@ -68,19 +75,24 @@ void insertarIdentOrdenado(NODO**, char[]);
 {CONSTANTE_OCTAL} {printf("Encontre una constante octal : %s \n" , yytext);}
 {CONSTANTE_HEXADECIMAL} {printf("Encontre una constante hexadecimal : %s \n" , yytext);}
 {CONSTANTE_REAL} {printf("Encontre una constante real : %s\n",yytext);}
-{LITERAL_CADENA} {  cad=yytext;
-                    longg=yyleng;
+{LITERAL_CADENA} {  
+                    cad=yytext;
+                    longg=yyleng-2;
                     insertarLitCad(&listaLitCadena,cad,longg);
 
 }
 
-{PALABRAS_RESERVADAS} {printf("encontre una palabra reservada : %s \n", yytext);}
+{PALABRAS_RESERVADAS} {
+                    strcpy(palR,yytext);
+                    insertarAlFinal(&listaPalReserv,palR);
+                    fflush(stdin);
+}
 {CARACTER_SIMPLE} {printf("encontre el caracter: %s \n", yytext);}
 {IDENTIFICADOR} {
-                strcpy(ids,yytext);
-                insertarIdentOrdenado(&listaIdentificadores,ids);
-                fflush(stdin);
-            
+                    strcpy(ids,yytext);
+                    insertarIdentOrdenado(&listaIdentificadores,ids);
+                    fflush(stdin);
+                
         
  }
 
@@ -96,14 +108,20 @@ int main(){
     yyin = fopen("entrada.c" , "r");
     yyout = fopen("salida.c" , "w");
     yylex();
-    //mostrar literales cadena
-    if (VerificarSiEstaVaciaLitCad(listaLitCadena)==0) {
-    RecorrerListaLitCad(listaLitCadena);
-    }
+
     //mostrar identificadores
     if (VerificarSiEstaVacia(listaIdentificadores)==0) {
     RecorrerLista(listaIdentificadores);
     }
+    //mostrar literales cadena
+    if (VerificarSiEstaVaciaLitCad(listaLitCadena)==0) {
+    RecorrerListaLitCad(listaLitCadena);
+    }
+    //mostrar palabras reservadas
+    if (VerificarSiEstaVacia(listaPalReserv)==0){
+        recorrerListaPalReserv(listaPalReserv);
+    }
+
     return 0;
 }
 
@@ -183,6 +201,7 @@ int EstaElElemento(NODO*l, char palabra[]){
         
         return 0;
 }
+
 // Fin funciones para identificadores
 
 
@@ -241,3 +260,28 @@ void insertarLitCad(struct NodoLitCad** lista,char* cadena,int longitud){
         }
 
 //fin de literales cadena
+
+//Func para pal reservadas
+void insertarAlFinal(NODO**l, char palabra[]) {
+    NODO* nuevo_nodo = NULL;
+    nuevo_nodo = CrearNodo(palabra);
+    NODO* aux1 = *l;
+    if (aux1 == NULL) {
+        InsertarAlPpio(l,palabra);
+    } else{
+    while(aux1->sgte != NULL) {
+        aux1 = aux1->sgte;
+    }
+    aux1->sgte = nuevo_nodo;
+    }
+}
+
+void recorrerListaPalReserv(NODO* l) {
+    NODO* aux1 = l;
+    printf("----LISTA DE PALABRAS RESERVADAS----\n");
+    while(aux1 != NULL) {
+        printf("%s \n",aux1->Palabra);
+        aux1 = aux1->sgte;
+    }
+}
+//fin de pala reservadas
