@@ -17,7 +17,26 @@ COMENTARIOS ("//".*)|"/*"([^*/"]|"/*")*"*/"
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
+//funciones para literales cadena
 
+struct NodoLitCad {
+    char* cadena;
+    int longitud;
+    struct NodoLitCad* sgte;
+};
+
+
+struct NodoLitCad* CrearNodoLitCad(char*,int);
+void RecorrerListaLitCad(struct NodoLitCad*);
+int VerificarSiEstaVaciaLitCad(struct NodoLitCad*);
+void InsertarAlPpioLitCad(struct NodoLitCad**,char*,int);
+void insertarLitCad(struct NodoLitCad**,char*,int);
+
+    char* cad;
+    int longg;
+    struct NodoLitCad* listaLitCadena = NULL;
+
+//funciones para identificadores
    typedef struct Nodo {
     char Palabra[20];
     struct Nodo* sgte;
@@ -48,7 +67,11 @@ void insertarOrdenado(NODO**, char[]);
 {CONSTANTE_OCTAL} {printf("Encontre una constante octal : %s \n" , yytext);}
 {CONSTANTE_HEXADECIMAL} {printf("Encontre una constante hexadecimal : %s \n" , yytext);}
 {CONSTANTE_REAL} {printf("Encontre una constante real : %s\n",yytext);}
-{LITERAL_CADENA} {printf("Se encontre el literal cadena: %s \n", yytext);}
+{LITERAL_CADENA} {  cad=yytext;
+                    longg=yyleng;
+                    printf("---%s---%i",cad,longg);
+                    insertarLitCad(&listaLitCadena,cad,longg);
+}
 {PALABRAS_RESERVADAS} {printf("encontre una palabra reservada : %s \n", yytext);}
 {CARACTER_SIMPLE} {printf("encontre el caracter: %s \n", yytext);}
 {IDENTIFICADOR} {
@@ -78,10 +101,11 @@ void insertarOrdenado(NODO**, char[]);
 
 int main(){
     
-    yyin = fopen("entrada.txt" , "r");
-    yyout = fopen("salida.txt" , "w");
+    yyin = fopen("entrada.c" , "r");
+    yyout = fopen("salida.c" , "w");
     yylex();
-
+//mostrar literales cadena
+RecorrerListaLitCad(listaLitCadena);
    	if (contadorIdentificadores != 0 ) {
            printf("Se encontraron %d identificadores\nLista de identificadores: \n",contadorIdentificadores);
            RecorrerLista(listaIdentificadores);
@@ -161,3 +185,58 @@ int EstaElElemento(NODO*l, char palabra[]){
         
         return 0;
 }
+//funciones para literales cadena
+
+struct NodoLitCad* CrearNodoLitCad(char* cadena,int longitud) {
+    struct NodoLitCad* nuevo_nodo = NULL;
+    nuevo_nodo = (struct NodoLitCad*) malloc(sizeof(struct NodoLitCad));
+    nuevo_nodo->cadena= strdup(cadena);
+    nuevo_nodo->longitud=longitud;
+    nuevo_nodo->sgte = NULL;    
+}
+
+void RecorrerListaLitCad(struct NodoLitCad *lista) {
+    struct NodoLitCad *aux = lista;
+    printf("Lista de literales cadena\n\n");
+    while (aux != NULL) {
+        printf("%s , longitud: %i \n",aux->cadena,aux->longitud);
+        aux = aux->sgte; 
+    }
+}
+
+int VerificarSiEstaVaciaLitCad(struct NodoLitCad* lista){
+    if (lista == NULL){
+    return 1;
+    } else {
+        return 0;
+    }
+    }
+void InsertarAlPpioLitCad(struct NodoLitCad** lista,char* cadena,int longitud){
+    struct NodoLitCad* nuevo_nodo = NULL;
+    nuevo_nodo = CrearNodoLitCad(cadena,longitud);
+    nuevo_nodo->sgte = *lista;
+    *lista = nuevo_nodo;
+
+}
+
+void insertarLitCad(struct NodoLitCad** lista,char* cadena,int longitud){
+        struct NodoLitCad* aux1 = *lista; 
+        if(VerificarSiEstaVaciaLitCad(aux1) == 1) {
+            InsertarAlPpioLitCad(lista,cadena,longitud);
+
+        } 
+        else {
+                struct NodoLitCad* aux2 = aux1->sgte;
+                while(aux1->sgte != NULL) {
+                    aux1 = aux1->sgte;
+                    aux2 = aux2->sgte;
+                }
+                if (aux2==NULL) {
+                    struct NodoLitCad* nuevo_nodo = NULL;
+                    nuevo_nodo = CrearNodoLitCad(cadena,longitud);
+                    aux1->sgte=nuevo_nodo;
+                } 
+            }
+        }
+
+//fin de literales cadena
