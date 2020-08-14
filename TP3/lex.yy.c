@@ -360,23 +360,23 @@ static yyconst short int yy_base[204] =
         0,    0,  329,  330,  305,  323,   26,   46,  319,    0,
       330,   53,  310,   62,   57,   69,   72,  301,   75,    0,
       273,  275,   64,   32,   55,   59,  276,   63,  275,  283,
-       66,  264,  273,  271,  276,  257,  254,   94,  308,  307,
-      274,   72,   80,  273,  264,  330,  299,  291,  109,    0,
-       65,    0,  109,  114,    0,  256,  268,  255,  270,  257,
-      263,  249,  250,  247,  247,  250,  247,  244,    0,  243,
-      247,   92,  245,   84,  102,  249,  242,   96,   98,  247,
-      249,   97,  250,  237,  107,  249,  234,  246,  330,  330,
-      132,  264,  268,    0,    0,  135,  143,  153,  233,  245,
+       66,  264,  273,  271,  276,  257,  254,   94,  308,  330,
+      275,   72,   80,  274,  265,  330,  300,  292,  109,    0,
+       65,    0,  109,  114,    0,  257,  269,  256,  271,  258,
+      264,  250,  251,  248,  248,  251,  248,  245,    0,  244,
+      248,   92,  246,   84,  102,  250,  243,   96,   98,  248,
+      250,   97,  251,  238,  107,  250,  235,  247,  330,  330,
+      132,  265,  269,    0,    0,  135,  143,  153,  234,  246,
 
-      240,  228,   98,  242,  240,  236,  228,  234,  237,  223,
-      229,  226,  215,  217,  219,  226,  212,  210,  210,  222,
-      212,  216,  220,  222,  211,  212,  214,  214,  209,  203,
-      211,  211,  203,  196,  207,  330,  156,  201,  192,  200,
-      189,  196,  190,  187,  187,  187,  184,  196,  186,  190,
-      195,  194,  192,  182,  187,  175,  187,  178,  330,  184,
-      173,  182,  182,  167,  184,  178,  170,  171,  176,  167,
-      161,  165,  173,  170,  172,  156,  165,  167,  158,  161,
-      164,  162,  163,  156,  140,  133,  141,  131,  130,  122,
+      241,  229,   98,  243,  241,  237,  229,  235,  238,  224,
+      230,  227,  216,  218,  220,  227,  213,  211,  211,  223,
+      213,  217,  221,  223,  212,  213,  215,  215,  210,  204,
+      212,  212,  204,  197,  208,  330,  156,  202,  193,  201,
+      190,  197,  191,  188,  188,  188,  185,  197,  187,  191,
+      196,  195,  193,  183,  188,  176,  188,  179,  330,  185,
+      174,  183,  183,  168,  185,  179,  171,  172,  177,  168,
+      162,  166,  174,  171,  173,  157,  166,  168,  159,  162,
+      165,  163,  164,  160,  144,  141,  146,  131,  130,  122,
       127,  123,  122,  109,  115,   66,  330,  175,  180,  182,
 
       187,  192,   63
@@ -387,7 +387,7 @@ static yyconst short int yy_def[204] =
       197,    1,  197,  197,  197,  198,  197,  197,  197,  199,
       197,  197,  197,  197,  197,  197,  197,  197,  197,  200,
       200,  200,  200,  200,  200,  200,  200,  200,  200,  200,
-      200,  200,  200,  200,  200,  197,  197,  197,  198,  198,
+      200,  200,  200,  200,  200,  197,  197,  197,  198,  197,
       197,  197,  197,  197,  197,  197,  197,  197,  201,  202,
       197,  203,  197,  197,  200,  200,  200,  200,  200,  200,
       200,  200,  200,  200,  200,  200,  200,  200,  200,  200,
@@ -429,23 +429,23 @@ static yyconst short int yy_nxt[391] =
       113,  131,   92,  122,  128,  139,  140,   93,  118,   69,
       132,  137,  137,  137,   96,   69,   96,   69,  159,   97,
        97,   97,  159,  196,   96,  195,   96,   69,   98,  137,
-      137,  137,  137,  137,  137,   39,  194,   39,   39,   39,
-       47,   69,   47,   47,   47,   55,   55,   91,   91,  193,
-       91,   91,   94,  192,   94,   94,   94,  191,  159,  159,
+      137,  137,  137,  137,  137,   39,   39,   39,   39,   39,
+       47,  194,   47,   47,   47,   55,   55,   91,   91,   69,
+       91,   91,   94,  193,   94,   94,   94,  192,  191,  159,
 
-      190,  189,  188,   69,   69,   69,   69,   69,   69,  187,
-       69,   69,  186,  185,  159,  184,  183,  182,  159,  159,
-      159,  181,   69,  180,  179,   69,  178,  177,  176,  175,
-      174,  173,   69,  172,  171,   69,  170,  169,  168,  167,
-       69,   69,  166,  165,  164,  163,  162,  161,  160,  159,
-      159,  158,  157,  156,   69,  155,  154,  153,  152,  151,
-      150,  149,  148,  147,  146,  145,   69,   69,  144,  143,
-       69,   69,  142,  141,   69,   69,  138,   69,   91,  136,
-      135,  134,  133,  130,  129,  126,  125,  120,  119,  114,
-      111,   69,  110,   69,  109,  108,  107,  106,  105,  104,
+      159,  190,  189,  188,   69,   69,   69,   69,   69,   69,
+      187,   69,   69,  186,  185,  159,  184,  183,  182,  159,
+      159,  159,  181,   69,  180,  179,   69,  178,  177,  176,
+      175,  174,  173,   69,  172,  171,   69,  170,  169,  168,
+      167,   69,   69,  166,  165,  164,  163,  162,  161,  160,
+      159,  159,  158,  157,  156,   69,  155,  154,  153,  152,
+      151,  150,  149,  148,  147,  146,  145,   69,   69,  144,
+      143,   69,   69,  142,  141,   69,   69,  138,   69,   91,
+      136,  135,  134,  133,  130,  129,  126,  125,  120,  119,
+      114,  111,   69,  110,   69,  109,  108,  107,  106,  105,
 
-      103,  102,  101,  100,   99,   90,   89,   88,   87,   81,
-       40,   40,   38,   38,   80,   79,   78,   77,   72,   71,
+      104,  103,  102,  101,  100,   99,   90,   89,   88,   87,
+       81,   40,   38,   38,   80,   79,   78,   77,   72,   71,
        68,   57,   56,   38,   48,   38,   40,   38,  197,    3,
       197,  197,  197,  197,  197,  197,  197,  197,  197,  197,
       197,  197,  197,  197,  197,  197,  197,  197,  197,  197,
@@ -475,23 +475,23 @@ static yyconst short int yy_chk[391] =
        72,   85,   91,   78,   82,  103,  103,   91,   75,  195,
        85,   96,   96,   96,   97,  194,   97,  193,  192,   97,
        97,   97,  191,  190,   98,  189,   98,  188,   97,   98,
-       98,   98,  137,  137,  137,  198,  187,  198,  198,  198,
-      199,  186,  199,  199,  199,  200,  200,  201,  201,  185,
-      201,  201,  202,  184,  202,  202,  202,  183,  182,  181,
+       98,   98,  137,  137,  137,  198,  198,  198,  198,  198,
+      199,  187,  199,  199,  199,  200,  200,  201,  201,  186,
+      201,  201,  202,  185,  202,  202,  202,  184,  183,  182,
 
-      180,  179,  178,  177,  176,  175,  174,  173,  172,  171,
-      170,  169,  168,  167,  166,  165,  164,  163,  162,  161,
-      160,  158,  157,  156,  155,  154,  153,  152,  151,  150,
-      149,  148,  147,  146,  145,  144,  143,  142,  141,  140,
-      139,  138,  135,  134,  133,  132,  131,  130,  129,  128,
-      127,  126,  125,  124,  123,  122,  121,  120,  119,  118,
-      117,  116,  115,  114,  113,  112,  111,  110,  109,  108,
-      107,  106,  105,  104,  102,  101,  100,   99,   93,   92,
-       88,   87,   86,   84,   83,   81,   80,   77,   76,   73,
-       71,   70,   68,   67,   66,   65,   64,   63,   62,   61,
+      181,  180,  179,  178,  177,  176,  175,  174,  173,  172,
+      171,  170,  169,  168,  167,  166,  165,  164,  163,  162,
+      161,  160,  158,  157,  156,  155,  154,  153,  152,  151,
+      150,  149,  148,  147,  146,  145,  144,  143,  142,  141,
+      140,  139,  138,  135,  134,  133,  132,  131,  130,  129,
+      128,  127,  126,  125,  124,  123,  122,  121,  120,  119,
+      118,  117,  116,  115,  114,  113,  112,  111,  110,  109,
+      108,  107,  106,  105,  104,  102,  101,  100,   99,   93,
+       92,   88,   87,   86,   84,   83,   81,   80,   77,   76,
+       73,   71,   70,   68,   67,   66,   65,   64,   63,   62,
 
-       60,   59,   58,   57,   56,   48,   47,   45,   44,   41,
-       40,   39,   37,   36,   35,   34,   33,   32,   30,   29,
+       61,   60,   59,   58,   57,   56,   48,   47,   45,   44,
+       41,   39,   37,   36,   35,   34,   33,   32,   30,   29,
        27,   22,   21,   18,   13,    9,    6,    5,    3,  197,
       197,  197,  197,  197,  197,  197,  197,  197,  197,  197,
       197,  197,  197,  197,  197,  197,  197,  197,  197,  197,
@@ -540,24 +540,56 @@ void insertarLitCad(struct NodoLitCad**,char*,int);
 //funciones para identificadores
    typedef struct Nodo {
     char Palabra[20];
+    int cantidad;
     struct Nodo* sgte;
 }NODO;
 
 
 NODO* CrearNodo(char[]);
 void RecorrerLista(NODO*); 
-int VerificarSiEstaVacia(NODO*);
+int VerificarSiEstaVacia(NODO*);    
 int EstaElElemento(NODO*, char[]);
 void InsertarAlPpio(NODO** l, char[]);
-void insertarOrdenado(NODO**, char[]);
+void insertarIdentOrdenado(NODO**, char[]);
 
-    
-#line 57 "tp3.l"
+void insertarAlFinal(NODO**,char[]);
+void recorrerListaPalReserv(NODO*);
+
+//funciones para constantes
+typedef struct constantes {
+    long constante;
+    int posicion;
+    struct constantes* sgte;
+}NODOCONST;
+
+NODOCONST* CrearNodoConst(int);
+int VerificarSiEstaVaciaConst(NODOCONST*);
+void InsertarAlFinalConst(NODOCONST**, long);
+void mostrarOctales (NODOCONST*);
+void mostrarHexa (NODOCONST*);
+void mostrarDecimal (NODOCONST*);
+void mostrarFloat (NODOCONST*);
+void mostrarCarac (NODOCONST*);
+
+NODOCONST* listaConstantesOct = NULL;
+NODOCONST* listaConstantesHex = NULL;
+NODOCONST* listaConstantesDec = NULL;
+NODOCONST* listaConstantesFloat = NULL;
+NODOCONST* listaConstantesCarac = NULL;
+long AuxConst;
+
+
+
+
+#line 86 "tp3.l"
     char ids[20];
+    char palR[20];
     // char* ids;
     NODO* listaIdentificadores = NULL;
     int contadorIdentificadores = 0;
-#line 561 "lex.yy.c"
+    NODO* listaPalReserv = NULL;
+
+#line 593 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -708,10 +740,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 63 "tp3.l"
+#line 95 "tp3.l"
 
 
-#line 715 "lex.yy.c"
+#line 747 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -796,78 +828,79 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 65 "tp3.l"
+#line 97 "tp3.l"
 {printf("Encontre el comentario : %s \n",yytext);}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 66 "tp3.l"
+#line 98 "tp3.l"
 {printf("Encontre una constante decimal : %s \n" , yytext);}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 67 "tp3.l"
-{printf("Encontre una constante octal : %s \n" , yytext);}
+#line 99 "tp3.l"
+{
+                    AuxConst=strtol(yytext,NULL,8);
+                    InsertarAlFinalConst(&listaConstantesOct,AuxConst);
+
+}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 68 "tp3.l"
-{printf("Encontre una constante hexadecimal : %s \n" , yytext);}
+#line 104 "tp3.l"
+{
+                    AuxConst = strtol(yytext,NULL,16);
+                    InsertarAlFinalConst(&listaConstantesHex,AuxConst);
+}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 69 "tp3.l"
+#line 108 "tp3.l"
 {printf("Encontre una constante real : %s\n",yytext);}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 70 "tp3.l"
-{  cad=yytext;
-                    longg=yyleng;
-                    printf("---%s---%i",cad,longg);
+#line 109 "tp3.l"
+{  
+                    cad=yytext;
+                    longg=yyleng-2;
                     insertarLitCad(&listaLitCadena,cad,longg);
+
 }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 75 "tp3.l"
-{printf("encontre una palabra reservada : %s \n", yytext);}
+#line 116 "tp3.l"
+{
+                    strcpy(palR,yytext);
+                    insertarAlFinal(&listaPalReserv,palR);
+                    fflush(stdin);
+}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 76 "tp3.l"
+#line 121 "tp3.l"
 {printf("encontre el caracter: %s \n", yytext);}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 77 "tp3.l"
+#line 122 "tp3.l"
 {
-                strcpy(ids,yytext);
-            if (VerificarSiEstaVacia(listaIdentificadores)==1) {
-
-                insertarOrdenado(&listaIdentificadores,ids);
-                contadorIdentificadores++;
-            } else if (EstaElElemento(listaIdentificadores,ids)==1) {
-                contadorIdentificadores++;
+                    strcpy(ids,yytext);
+                    insertarIdentOrdenado(&listaIdentificadores,ids);
+                    fflush(stdin);
                 
-
-            } else {
-                insertarOrdenado(&listaIdentificadores,ids);
-                contadorIdentificadores++;
-            }
-            fflush(stdin);
-            
         
  }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 95 "tp3.l"
+#line 130 "tp3.l"
 {printf("Encontre la directiva al precompilador: %s \n ",yytext);}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 96 "tp3.l"
+#line 131 "tp3.l"
 {printf("encontre el caracter de puntuacion: %s \n", yytext);}
 	YY_BREAK
 case 12:
@@ -875,15 +908,15 @@ case 12:
 yy_c_buf_p = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up yytext again */
 YY_RULE_SETUP
-#line 97 "tp3.l"
+#line 132 "tp3.l"
 {printf("encontre el operador: %s \n", yytext);}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 99 "tp3.l"
+#line 134 "tp3.l"
 ECHO;
 	YY_BREAK
-#line 887 "lex.yy.c"
+#line 920 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1769,7 +1802,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 99 "tp3.l"
+#line 134 "tp3.l"
 
 
 
@@ -1778,31 +1811,44 @@ int main(){
     yyin = fopen("entrada.c" , "r");
     yyout = fopen("salida.c" , "w");
     yylex();
-//mostrar literales cadena
-RecorrerListaLitCad(listaLitCadena);
-   	if (contadorIdentificadores != 0 ) {
-           printf("Se encontraron %d identificadores\nLista de identificadores: \n",contadorIdentificadores);
-           RecorrerLista(listaIdentificadores);
-       } else {
-           printf("La lista esta vacia");
-       }
-    
 
+    //mostrar identificadores
+    if (VerificarSiEstaVacia(listaIdentificadores)==0) {
+    RecorrerLista(listaIdentificadores);
+    }
+    //mostrar literales cadena
+    if (VerificarSiEstaVaciaLitCad(listaLitCadena)==0) {
+    RecorrerListaLitCad(listaLitCadena);
+    }
+    //mostrar palabras reservadas
+    if (VerificarSiEstaVacia(listaPalReserv)==0){
+        recorrerListaPalReserv(listaPalReserv);
+    }
+    //mostrar octales
+    if(VerificarSiEstaVaciaConst(listaConstantesOct)==0) {
+        mostrarOctales(listaConstantesOct);
+    }
+    //mostrar Hexadecimales
+    if(VerificarSiEstaVaciaConst(listaConstantesHex)==0) {
+        mostrarHexa(listaConstantesHex);
     return 0;
 }
+}
 
-
+// Funciones para identificadores
 NODO* CrearNodo(char palabra[]) {
     NODO* nuevo_nodo = NULL;
     nuevo_nodo = (NODO*) malloc(sizeof(NODO));
     strcpy(nuevo_nodo->Palabra, palabra);
+    nuevo_nodo->cantidad = 1;
     nuevo_nodo->sgte = NULL;    
 }
 
 void RecorrerLista(NODO *l) {
     NODO *aux = l;
+    printf("---- LISTA DE IDENTIFICADORES ----\n");
     while (aux != NULL) {
-        printf("%s \n",aux->Palabra);
+        printf("el id: %s aparece: %d veces\n",aux->Palabra,aux->cantidad);
         aux = aux->sgte; 
     }
 }
@@ -1822,30 +1868,36 @@ void InsertarAlPpio(NODO** l, char palabra[]){
 
 }
 
-void insertarOrdenado(NODO** l, char palabra[]){
-        NODO* aux1 = *l; 
-        if(VerificarSiEstaVacia(aux1) == 1 || strcmp(palabra,aux1->Palabra)<0) {
+void insertarIdentOrdenado(NODO** l, char palabra[]){
+        NODO* aux1 = *l;
+        if (VerificarSiEstaVacia(aux1)){
             InsertarAlPpio(l,palabra);
-
-        } 
-        else {
-                NODO* aux2 = aux1->sgte;
-                while(aux1->sgte != NULL && (strcmp(palabra,aux1->sgte->Palabra)>0)) {
-                    aux1 = aux1->sgte;
-                    aux2 = aux2->sgte;
-                }
-                if (aux2==NULL) {
+        } else if (EstaElElemento(aux1,palabra)==0) {
+                if( strcasecmp(palabra,aux1->Palabra)<0) {
+                InsertarAlPpio(l,palabra);
+            } else {
+                    NODO* aux2 = aux1->sgte;
+                    while(aux1->sgte != NULL && (strcasecmp(palabra,aux1->sgte->Palabra)>0)) {
+                        aux1 = aux1->sgte;
+                        aux2 = aux2->sgte;
+                    }
+                    if (aux2==NULL) {
+                        NODO* nuevo_nodo = NULL;
+                        nuevo_nodo = CrearNodo(palabra);
+                        aux1->sgte=nuevo_nodo;
+                    } else {
                     NODO* nuevo_nodo = NULL;
                     nuevo_nodo = CrearNodo(palabra);
-                    aux1->sgte=nuevo_nodo;
-                } else {
-                NODO* nuevo_nodo = NULL;
-                nuevo_nodo = CrearNodo(palabra);
-                nuevo_nodo->sgte = aux2;
-                aux1->sgte = nuevo_nodo;
-                }
-            }
+                    nuevo_nodo->sgte = aux2;
+                    aux1->sgte = nuevo_nodo;
+                    }
         }
+        } else {
+            while (strcasecmp(aux1->Palabra,palabra)!=0){
+                aux1 = aux1->sgte;
+            } aux1->cantidad++;
+        }
+}
 
 int EstaElElemento(NODO*l, char palabra[]){
     NODO* aux = l;
@@ -1859,6 +1911,10 @@ int EstaElElemento(NODO*l, char palabra[]){
         
         return 0;
 }
+
+// Fin funciones para identificadores
+
+
 //funciones para literales cadena
 
 struct NodoLitCad* CrearNodoLitCad(char* cadena,int longitud) {
@@ -1871,7 +1927,7 @@ struct NodoLitCad* CrearNodoLitCad(char* cadena,int longitud) {
 
 void RecorrerListaLitCad(struct NodoLitCad *lista) {
     struct NodoLitCad *aux = lista;
-    printf("Lista de literales cadena\n\n");
+    printf("----LISTA DE LITERALES CADENA----\n");
     while (aux != NULL) {
         printf("%s , longitud: %i \n",aux->cadena,aux->longitud);
         aux = aux->sgte; 
@@ -1914,3 +1970,77 @@ void insertarLitCad(struct NodoLitCad** lista,char* cadena,int longitud){
         }
 
 //fin de literales cadena
+
+//Func para pal reservadas
+void insertarAlFinal(NODO**l, char palabra[]) {
+    NODO* nuevo_nodo = NULL;
+    nuevo_nodo = CrearNodo(palabra);
+    NODO* aux1 = *l;
+    if (aux1 == NULL) {
+        InsertarAlPpio(l,palabra);
+    } else{
+    while(aux1->sgte != NULL) {
+        aux1 = aux1->sgte;
+    }
+    aux1->sgte = nuevo_nodo;
+    }
+}
+
+void recorrerListaPalReserv(NODO* l) {
+    NODO* aux1 = l;
+    printf("----LISTA DE PALABRAS RESERVADAS----\n");
+    while(aux1 != NULL) {
+        printf("%s \n",aux1->Palabra);
+        aux1 = aux1->sgte;
+    }
+}
+//fin de pala reservadas
+
+//funciones constantes
+NODOCONST* CrearNodoConst(int c) {
+    NODOCONST* nuevo_nodo = NULL;
+    nuevo_nodo = (NODOCONST*) malloc(sizeof(NODOCONST));
+    nuevo_nodo->constante = c;
+    nuevo_nodo->sgte = NULL;
+    
+}
+
+int VerificarSiEstaVaciaConst(NODOCONST*c){
+    if (c==NULL) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+void InsertarAlFinalConst(NODOCONST**c,long numero){
+    NODOCONST* aux1 = *c;
+    NODOCONST* nuevo_nodo = NULL;
+    nuevo_nodo = CrearNodoConst(numero);
+
+    if (VerificarSiEstaVaciaConst(aux1)==1){
+        *c = nuevo_nodo;
+    } else {
+        while (aux1->sgte != NULL) {
+            aux1 = aux1->sgte;
+        }
+        aux1->sgte = nuevo_nodo;
+    }
+}
+
+
+void mostrarOctales (NODOCONST*c){
+    NODOCONST* aux1 = c;
+    printf("----CONSTANTES OCTALES----\n");
+    while(aux1 != NULL ) {
+        printf("Constante octal: %o, En decimal: %d\n",aux1->constante,aux1->constante);
+        aux1= aux1->sgte;
+    }
+}
+void mostrarHexa(NODOCONST*c){
+    NODOCONST* aux1 = c;
+    printf("----CONSTANTES HEXADECIMALES----\n");
+    while(aux1 != NULL ) {
+        printf("Constante hexadecimal: %X, En decimal: %d\n",aux1->constante,aux1->constante);
+        aux1= aux1->sgte;
+    }
+}

@@ -201,11 +201,11 @@ void insertarIdentOrdenado(NODO** l, char palabra[]){
         if (VerificarSiEstaVacia(aux1)){
             InsertarAlPpio(l,palabra);
         } else if (EstaElElemento(aux1,palabra)==0) {
-                if(strcmp(palabra,aux1->Palabra)<0) {
+                if( strcasecmp(palabra,aux1->Palabra)<0) {
                 InsertarAlPpio(l,palabra);
             } else {
                     NODO* aux2 = aux1->sgte;
-                    while(aux1->sgte != NULL && (strcmp(palabra,aux1->sgte->Palabra)>0)) {
+                    while(aux1->sgte != NULL && (strcasecmp(palabra,aux1->sgte->Palabra)>0)) {
                         aux1 = aux1->sgte;
                         aux2 = aux2->sgte;
                     }
@@ -221,7 +221,7 @@ void insertarIdentOrdenado(NODO** l, char palabra[]){
                     }
         }
         } else {
-            while (strcmp(aux1->Palabra,palabra)!=0){
+            while (strcasecmp(aux1->Palabra,palabra)!=0){
                 aux1 = aux1->sgte;
             } aux1->cantidad++;
         }
