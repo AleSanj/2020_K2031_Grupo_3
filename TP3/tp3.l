@@ -6,7 +6,7 @@ CONSTANTE_DECIMAL [1-9][0-9]*
 CONSTANTE_OCTAL 0[0-7]*
 CONSTANTE_HEXADECIMAL 0[xX][0-9a-fA-F]+
 CONSTANTE_REAL [1-9][0-9]*"."[0-9]*"E"?[\+\-]?[0-9]*
-LITERAL_CADENA \".*\"
+LITERAL_CADENA \"[^\"]*\"
 CARACTER_SIMPLE "'"."'"
 IDENTIFICADOR ([a-zA-Z]|_)([a-zA-Z]|[0-9]|_)*
 OPERADOR "+"|"-"|"/"|"*"|"%"|"&&"|"||"|"¬"|">"|">="|"<"|"<="|"=="|"!="
@@ -39,6 +39,7 @@ void insertarLitCad(struct NodoLitCad**,char*,int);
 //funciones para identificadores
    typedef struct Nodo {
     char Palabra[20];
+    int cantidad;
     struct Nodo* sgte;
 }NODO;
 
@@ -48,7 +49,7 @@ void RecorrerLista(NODO*);
 int VerificarSiEstaVacia(NODO*);
 int EstaElElemento(NODO*, char[]);
 void InsertarAlPpio(NODO** l, char[]);
-void insertarOrdenado(NODO**, char[]);
+void insertarIdentOrdenado(NODO**, char[]);
 
     
 %}
@@ -69,29 +70,20 @@ void insertarOrdenado(NODO**, char[]);
 {CONSTANTE_REAL} {printf("Encontre una constante real : %s\n",yytext);}
 {LITERAL_CADENA} {  cad=yytext;
                     longg=yyleng;
-                    printf("---%s---%i",cad,longg);
                     insertarLitCad(&listaLitCadena,cad,longg);
+
 }
+
 {PALABRAS_RESERVADAS} {printf("encontre una palabra reservada : %s \n", yytext);}
 {CARACTER_SIMPLE} {printf("encontre el caracter: %s \n", yytext);}
 {IDENTIFICADOR} {
                 strcpy(ids,yytext);
-            if (VerificarSiEstaVacia(listaIdentificadores)==1) {
-
-                insertarOrdenado(&listaIdentificadores,ids);
-                contadorIdentificadores++;
-            } else if (EstaElElemento(listaIdentificadores,ids)==1) {
-                contadorIdentificadores++;
-                
-
-            } else {
-                insertarOrdenado(&listaIdentificadores,ids);
-                contadorIdentificadores++;
-            }
-            fflush(stdin);
+                insertarIdentOrdenado(&listaIdentificadores,ids);
+                fflush(stdin);
             
         
  }
+
 {DIRECTIVAALPRECOMPILADOR} {printf("Encontre la directiva al precompilador: %s \n ",yytext);}
 {CARACTER_DE_PUNTUACION} {printf("encontre el caracter de puntuacion: %s \n", yytext);}
 {OPERADOR}/{NUMERO} {printf("encontre el operador: %s \n", yytext);}
@@ -104,31 +96,31 @@ int main(){
     yyin = fopen("entrada.c" , "r");
     yyout = fopen("salida.c" , "w");
     yylex();
-//mostrar literales cadena
-RecorrerListaLitCad(listaLitCadena);
-   	if (contadorIdentificadores != 0 ) {
-           printf("Se encontraron %d identificadores\nLista de identificadores: \n",contadorIdentificadores);
-           RecorrerLista(listaIdentificadores);
-       } else {
-           printf("La lista esta vacia");
-       }
-    
-
+    //mostrar literales cadena
+    if (VerificarSiEstaVaciaLitCad(listaLitCadena)==0) {
+    RecorrerListaLitCad(listaLitCadena);
+    }
+    //mostrar identificadores
+    if (VerificarSiEstaVacia(listaIdentificadores)==0) {
+    RecorrerLista(listaIdentificadores);
+    }
     return 0;
 }
 
-
+// Funciones para identificadores
 NODO* CrearNodo(char palabra[]) {
     NODO* nuevo_nodo = NULL;
     nuevo_nodo = (NODO*) malloc(sizeof(NODO));
     strcpy(nuevo_nodo->Palabra, palabra);
+    nuevo_nodo->cantidad = 1;
     nuevo_nodo->sgte = NULL;    
 }
 
 void RecorrerLista(NODO *l) {
     NODO *aux = l;
+    printf("---- LISTA DE IDENTIFICADORES ----\n");
     while (aux != NULL) {
-        printf("%s \n",aux->Palabra);
+        printf("el id: %s aparece: %d veces\n",aux->Palabra,aux->cantidad);
         aux = aux->sgte; 
     }
 }
@@ -148,30 +140,36 @@ void InsertarAlPpio(NODO** l, char palabra[]){
 
 }
 
-void insertarOrdenado(NODO** l, char palabra[]){
-        NODO* aux1 = *l; 
-        if(VerificarSiEstaVacia(aux1) == 1 || strcmp(palabra,aux1->Palabra)<0) {
+void insertarIdentOrdenado(NODO** l, char palabra[]){
+        NODO* aux1 = *l;
+        if (VerificarSiEstaVacia(aux1)){
             InsertarAlPpio(l,palabra);
-
-        } 
-        else {
-                NODO* aux2 = aux1->sgte;
-                while(aux1->sgte != NULL && (strcmp(palabra,aux1->sgte->Palabra)>0)) {
-                    aux1 = aux1->sgte;
-                    aux2 = aux2->sgte;
-                }
-                if (aux2==NULL) {
+        } else if (EstaElElemento(aux1,palabra)==0) {
+                if(strcmp(palabra,aux1->Palabra)<0) {
+                InsertarAlPpio(l,palabra);
+            } else {
+                    NODO* aux2 = aux1->sgte;
+                    while(aux1->sgte != NULL && (strcmp(palabra,aux1->sgte->Palabra)>0)) {
+                        aux1 = aux1->sgte;
+                        aux2 = aux2->sgte;
+                    }
+                    if (aux2==NULL) {
+                        NODO* nuevo_nodo = NULL;
+                        nuevo_nodo = CrearNodo(palabra);
+                        aux1->sgte=nuevo_nodo;
+                    } else {
                     NODO* nuevo_nodo = NULL;
                     nuevo_nodo = CrearNodo(palabra);
-                    aux1->sgte=nuevo_nodo;
-                } else {
-                NODO* nuevo_nodo = NULL;
-                nuevo_nodo = CrearNodo(palabra);
-                nuevo_nodo->sgte = aux2;
-                aux1->sgte = nuevo_nodo;
-                }
-            }
+                    nuevo_nodo->sgte = aux2;
+                    aux1->sgte = nuevo_nodo;
+                    }
         }
+        } else {
+            while (strcmp(aux1->Palabra,palabra)!=0){
+                aux1 = aux1->sgte;
+            } aux1->cantidad++;
+        }
+}
 
 int EstaElElemento(NODO*l, char palabra[]){
     NODO* aux = l;
@@ -185,6 +183,9 @@ int EstaElElemento(NODO*l, char palabra[]){
         
         return 0;
 }
+// Fin funciones para identificadores
+
+
 //funciones para literales cadena
 
 struct NodoLitCad* CrearNodoLitCad(char* cadena,int longitud) {
@@ -197,7 +198,7 @@ struct NodoLitCad* CrearNodoLitCad(char* cadena,int longitud) {
 
 void RecorrerListaLitCad(struct NodoLitCad *lista) {
     struct NodoLitCad *aux = lista;
-    printf("Lista de literales cadena\n\n");
+    printf("----LISTA DE LITERALES CADENA----\n");
     while (aux != NULL) {
         printf("%s , longitud: %i \n",aux->cadena,aux->longitud);
         aux = aux->sgte; 
