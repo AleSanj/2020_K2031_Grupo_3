@@ -46,7 +46,7 @@ void insertarLitCad(struct NodoLitCad**,char*,int);
 
 NODO* CrearNodo(char[]);
 void RecorrerLista(NODO*); 
-int VerificarSiEstaVacia(NODO*);
+int VerificarSiEstaVacia(NODO*);    
 int EstaElElemento(NODO*, char[]);
 void InsertarAlPpio(NODO** l, char[]);
 void insertarIdentOrdenado(NODO**, char[]);
@@ -54,7 +54,32 @@ void insertarIdentOrdenado(NODO**, char[]);
 void insertarAlFinal(NODO**,char[]);
 void recorrerListaPalReserv(NODO*);
 
-    
+//funciones para constantes
+typedef struct constantes {
+    long constante;
+    int posicion;
+    struct constantes* sgte;
+}NODOCONST;
+
+NODOCONST* CrearNodoConst(int);
+int VerificarSiEstaVaciaConst(NODOCONST*);
+void InsertarAlFinalConst(NODOCONST**, long);
+void mostrarOctales (NODOCONST*);
+void mostrarHexa (NODOCONST*);
+void mostrarDecimal (NODOCONST*);
+void mostrarFloat (NODOCONST*);
+void mostrarCarac (NODOCONST*);
+
+NODOCONST* listaConstantesOct = NULL;
+NODOCONST* listaConstantesHex = NULL;
+NODOCONST* listaConstantesDec = NULL;
+NODOCONST* listaConstantesFloat = NULL;
+NODOCONST* listaConstantesCarac = NULL;
+long AuxConst;
+
+
+
+
 %}
 
 %{
@@ -63,7 +88,6 @@ void recorrerListaPalReserv(NODO*);
     // char* ids;
     NODO* listaIdentificadores = NULL;
     int contadorIdentificadores = 0;
-
     NODO* listaPalReserv = NULL;
 
 %}
@@ -72,8 +96,15 @@ void recorrerListaPalReserv(NODO*);
 
 {COMENTARIOS} {printf("Encontre el comentario : %s \n",yytext);}
 {CONSTANTE_DECIMAL} {printf("Encontre una constante decimal : %s \n" , yytext);}
-{CONSTANTE_OCTAL} {printf("Encontre una constante octal : %s \n" , yytext);}
-{CONSTANTE_HEXADECIMAL} {printf("Encontre una constante hexadecimal : %s \n" , yytext);}
+{CONSTANTE_OCTAL} {
+                    AuxConst=strtol(yytext,NULL,8);
+                    InsertarAlFinalConst(&listaConstantesOct,AuxConst);
+
+}
+{CONSTANTE_HEXADECIMAL} {
+                    AuxConst = strtol(yytext,NULL,16);
+                    InsertarAlFinalConst(&listaConstantesHex,AuxConst);
+}
 {CONSTANTE_REAL} {printf("Encontre una constante real : %s\n",yytext);}
 {LITERAL_CADENA} {  
                     cad=yytext;
@@ -121,8 +152,15 @@ int main(){
     if (VerificarSiEstaVacia(listaPalReserv)==0){
         recorrerListaPalReserv(listaPalReserv);
     }
-
+    //mostrar octales
+    if(VerificarSiEstaVaciaConst(listaConstantesOct)==0) {
+        mostrarOctales(listaConstantesOct);
+    }
+    //mostrar Hexadecimales
+    if(VerificarSiEstaVaciaConst(listaConstantesHex)==0) {
+        mostrarHexa(listaConstantesHex);
     return 0;
+}
 }
 
 // Funciones para identificadores
@@ -285,3 +323,52 @@ void recorrerListaPalReserv(NODO* l) {
     }
 }
 //fin de pala reservadas
+
+//funciones constantes
+NODOCONST* CrearNodoConst(int c) {
+    NODOCONST* nuevo_nodo = NULL;
+    nuevo_nodo = (NODOCONST*) malloc(sizeof(NODOCONST));
+    nuevo_nodo->constante = c;
+    nuevo_nodo->sgte = NULL;
+    
+}
+
+int VerificarSiEstaVaciaConst(NODOCONST*c){
+    if (c==NULL) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
+void InsertarAlFinalConst(NODOCONST**c,long numero){
+    NODOCONST* aux1 = *c;
+    NODOCONST* nuevo_nodo = NULL;
+    nuevo_nodo = CrearNodoConst(numero);
+
+    if (VerificarSiEstaVaciaConst(aux1)==1){
+        *c = nuevo_nodo;
+    } else {
+        while (aux1->sgte != NULL) {
+            aux1 = aux1->sgte;
+        }
+        aux1->sgte = nuevo_nodo;
+    }
+}
+
+
+void mostrarOctales (NODOCONST*c){
+    NODOCONST* aux1 = c;
+    printf("----CONSTANTES OCTALES----\n");
+    while(aux1 != NULL ) {
+        printf("Constante octal: %o, En decimal: %d\n",aux1->constante,aux1->constante);
+        aux1= aux1->sgte;
+    }
+}
+void mostrarHexa(NODOCONST*c){
+    NODOCONST* aux1 = c;
+    printf("----CONSTANTES HEXADECIMALES----\n");
+    while(aux1 != NULL ) {
+        printf("Constante hexadecimal: %X, En decimal: %d\n",aux1->constante,aux1->constante);
+        aux1= aux1->sgte;
+    }
+}
