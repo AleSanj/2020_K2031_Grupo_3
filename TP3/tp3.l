@@ -168,18 +168,15 @@ int main(){
 
     //mostrar identificadores
     if (VerificarSiEstaVacia(listaIdentificadores)==0) {
-        char LISTAIDENTIFICADORES='A';
-    RecorrerLista(listaIdentificadores,LISTAIDENTIFICADORES);
+    RecorrerLista(listaIdentificadores,'A');
     }
     //mostrar literales cadena
     if (VerificarSiEstaVacia(listaLitCadena)==0) {
-        char LISTALITERALESCADENA='B';
-    RecorrerLista(listaLitCadena,LISTALITERALESCADENA);
+    RecorrerLista(listaLitCadena,'B');
     }
     //mostrar palabras reservadas
     if (VerificarSiEstaVacia(listaPalReserv)==0){
-        char LISTAPALABRASRESERVADAS='C';
-        RecorrerLista(listaPalReserv,LISTAPALABRASRESERVADAS);
+        RecorrerLista(listaPalReserv,'C');
     }
     //mostrar octales
     if(VerificarSiEstaVaciaConst(listaConstantesOct)==0) {
@@ -198,17 +195,14 @@ int main(){
 
     //mostrar op y caracteres de punt
     if (VerificarSiEstaVacia(listaOpYCarPunt)==0) {
-        char LISTAOPERADORES='D';
-    RecorrerLista(listaOpYCarPunt,LISTAOPERADORES);
+    RecorrerLista(listaOpYCarPunt,'D');
     }
      //mostrar comentarios
     if (VerificarSiEstaVacia(listaComentLinea)==0) {
-        char LISTACOMENTARIOSLINEA='E';
-    RecorrerLista(listaComentLinea,LISTACOMENTARIOSLINEA);
+    RecorrerLista(listaComentLinea,'E');
     }
     if (VerificarSiEstaVacia(listaComentMult)==0) {
-        char LISTACOMENTARIOSMULTIPLE='F';
-    RecorrerLista(listaComentMult,LISTACOMENTARIOSMULTIPLE);
+    RecorrerLista(listaComentMult,'F');
     }
 return 0;
 }
