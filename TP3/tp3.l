@@ -1,7 +1,7 @@
 %option noyywrap
 
 PALABRAS_RESERVADAS auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while
-CARACTER_DE_PUNTUACION "("|")"|"["|"]"|"{"|"}"|"*"|","|":"|"="|";"|"..."|"#"
+CARACTER_DE_PUNTUACION "("|")"|"["|"]"|"{"|"}"|","|":"|"="|";"|"..."|"#"
 CONSTANTE_DECIMAL [1-9][0-9]*
 CONSTANTE_OCTAL 0[0-7]*
 CONSTANTE_HEXADECIMAL 0[xX][0-9a-fA-F]+
@@ -78,6 +78,12 @@ NODOCONST* listaConstantesFloat = NULL;
 NODOCONST* listaConstantesCarac = NULL;
 long AuxConst;
 
+//funciones para operadores y caracteres de puntuacion
+void RecorrerListaOp(NODO*); 
+
+char op[20];
+char carPunt[20];
+NODO*listaOpYCarPunt=NULL;
 
 
 
@@ -130,8 +136,18 @@ long AuxConst;
  }
 
 {DIRECTIVAALPRECOMPILADOR} {printf("Encontre la directiva al precompilador: %s \n ",yytext);}
-{CARACTER_DE_PUNTUACION} {printf("encontre el caracter de puntuacion: %s \n", yytext);}
-{OPERADOR}/{NUMERO} {printf("encontre el operador: %s \n", yytext);}
+{CARACTER_DE_PUNTUACION} {
+                            strcpy(carPunt,yytext);
+                            insertarIdentOrdenado(&listaOpYCarPunt,carPunt);
+                            fflush(stdin);
+
+}
+{OPERADOR}/{NUMERO} {
+                        strcpy(op,yytext);
+                        insertarIdentOrdenado(&listaOpYCarPunt,op);
+                        fflush(stdin);
+
+}
 
 %%
 
@@ -161,8 +177,13 @@ int main(){
     //mostrar Hexadecimales
     if(VerificarSiEstaVaciaConst(listaConstantesHex)==0) {
         mostrarHexa(listaConstantesHex);
-    return 0;
+    
 }
+    //mostrar op y caracteres de punt
+    if (VerificarSiEstaVacia(listaOpYCarPunt)==0) {
+    RecorrerListaOp(listaOpYCarPunt);
+    }
+return 0;
 }
 
 // Funciones para identificadores
@@ -372,5 +393,17 @@ void mostrarHexa(NODOCONST*c){
     while(aux1 != NULL ) {
         printf("Constante hexadecimal: %X, En decimal: %d\n",aux1->constante,aux1->constante);
         aux1= aux1->sgte;
+    }
+}
+
+//funciones para operadores y caracteres de puntuacion
+//usa muchas funciones de identificadores
+
+void RecorrerListaOp(NODO *listaOpYCarPunt) {
+    NODO *aux = listaOpYCarPunt;
+    printf("---- LISTA DE OPERADRES Y CARACTERES DE PUNTUACION ----\n");
+    while (aux != NULL) {
+        printf(" %s aparece: %d veces\n",aux->Palabra,aux->cantidad);
+        aux = aux->sgte; 
     }
 }
