@@ -55,9 +55,10 @@ typedef struct constantes {
 NODOCONST* CrearNodoConst(int);
 int VerificarSiEstaVaciaConst(NODOCONST*);
 void InsertarAlFinalConst(NODOCONST**, long);
-void mostrarOctales (NODOCONST*);
-void mostrarHexa (NODOCONST*);
-void mostrarDecimal (NODOCONST*);
+// void mostrarOctales (NODOCONST*);
+// void mostrarHexa (NODOCONST*);
+void mostrarctes(NODOCONST*,char);
+// void mostrarDecimal (NODOCONST*);
 void mostrarFloat (NODOCONST*);
 void mostrarCarac (NODOCONST*);
 
@@ -107,7 +108,10 @@ NODO*listaComentMult=NULL;
                         fflush(stdin);
 
 }
-{CONSTANTE_DECIMAL} {printf("Encontre una constante decimal : %s \n" , yytext);}
+{CONSTANTE_DECIMAL} {
+                        AuxConst=strtol(yytext,NULL,10);
+                        InsertarAlFinalConst(&listaConstantesDec,AuxConst);
+}
 {CONSTANTE_OCTAL} {
                     AuxConst=strtol(yytext,NULL,8);
                     InsertarAlFinalConst(&listaConstantesOct,AuxConst);
@@ -152,7 +156,7 @@ NODO*listaComentMult=NULL;
                         fflush(stdin);
 
 }
-
+. {printf("%s\n",yytext);}
 %%
 
 
@@ -179,12 +183,15 @@ int main(){
     }
     //mostrar octales
     if(VerificarSiEstaVaciaConst(listaConstantesOct)==0) {
-        mostrarOctales(listaConstantesOct);
+        mostrarctes(listaConstantesOct,'O');
     }
     //mostrar Hexadecimales
     if(VerificarSiEstaVaciaConst(listaConstantesHex)==0) {
-        mostrarHexa(listaConstantesHex);
-    
+        mostrarctes(listaConstantesHex,'H');
+    //mostrar decimales
+    if(VerificarSiEstaVaciaConst(listaConstantesDec)==0){
+        mostrarctes(listaConstantesDec,'D');
+    }
 }
 
 
@@ -402,21 +409,29 @@ void InsertarAlFinalConst(NODOCONST**c,long numero){
     }
 }
 
-
-void mostrarOctales (NODOCONST*c){
+void mostrarctes(NODOCONST*c,char titulo){
     NODOCONST* aux1 = c;
-    printf("----CONSTANTES OCTALES----\n");
+    switch(titulo){
+        case 'O': printf("----CONSTANTES OCTALES----\n");
     while(aux1 != NULL ) {
         printf("Constante octal: %o, En decimal: %d\n",aux1->constante,aux1->constante);
         aux1= aux1->sgte;
-    }
-}
-void mostrarHexa(NODOCONST*c){
-    NODOCONST* aux1 = c;
-    printf("----CONSTANTES HEXADECIMALES----\n");
+    }break;
+    case 'H':printf("----CONSTANTES HEXADECIMALES----\n");
     while(aux1 != NULL ) {
         printf("Constante hexadecimal: %X, En decimal: %d\n",aux1->constante,aux1->constante);
         aux1= aux1->sgte;
+    } break;
+    case 'D': 
+    printf("----CONSTANTES DECIMALES----\n");
+    int contador=0;
+    while(aux1 != NULL ) {
+        printf("Constante decimal: %d\n",aux1->constante);
+        contador+=aux1->constante;
+        aux1= aux1->sgte;
     }
+    printf("La suma de todas las constantes decimales es: %d\n",contador);
+    break;
+    }
+    printf("\n");
 }
-
