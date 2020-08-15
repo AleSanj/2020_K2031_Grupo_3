@@ -12,7 +12,8 @@ IDENTIFICADOR ([a-zA-Z]|_)([a-zA-Z]|[0-9]|_)*
 OPERADOR "+"|"-"|"/"|"*"|"%"|"&&"|"||"|"¬"|">"|">="|"<"|"<="|"=="|"!="
 NUMERO [0-9]
 DIRECTIVAALPRECOMPILADOR "#"(define|elif|else|endif|error|if|ifdef|ifndef|include|message|undef)
-COMENTARIOS ("//".*)|"/*"([^*/"]|"/*")*"*/"
+COMENTARIO_LINEA "//".*
+COMENTARIO_COMPUESTO "/*"([^*]|\*+[^/])*\*+\/
 %{
     #include <stdio.h>
     #include <stdlib.h>
@@ -94,7 +95,8 @@ long AuxConst;
 
 %%
 
-{COMENTARIOS} {printf("Encontre el comentario : %s \n",yytext);}
+{COMENTARIO_LINEA} {printf("Encontre el comentario de linea : %s \n",yytext);}
+{COMENTARIO_COMPUESTO} {printf("Encontre el comentario compuesto : %s \n",yytext);}
 {CONSTANTE_DECIMAL} {printf("Encontre una constante decimal : %s \n" , yytext);}
 {CONSTANTE_OCTAL} {
                     AuxConst=strtol(yytext,NULL,8);
