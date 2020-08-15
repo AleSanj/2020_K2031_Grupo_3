@@ -13,46 +13,36 @@ OPERADOR "+"|"-"|"/"|"*"|"%"|"&&"|"||"|"¬"|">"|">="|"<"|"<="|"=="|"!="
 NUMERO [0-9]
 DIRECTIVAALPRECOMPILADOR "#"(define|elif|else|endif|error|if|ifdef|ifndef|include|message|undef)
 COMENTARIO_LINEA "//".*
-COMENTARIO_COMPUESTO "/*"([^*]|\*+[^/])*\*+\/
+COMENTARIO_MULTIPLE \/\*(\*+[^\*\/]|[^\*])*\*+\/
 %{
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
-//funciones para literales cadena
 
-struct NodoLitCad {
-    char* cadena;
-    int longitud;
-    struct NodoLitCad* sgte;
-};
-
-
-struct NodoLitCad* CrearNodoLitCad(char*,int);
-void RecorrerListaLitCad(struct NodoLitCad*);
-int VerificarSiEstaVaciaLitCad(struct NodoLitCad*);
-void InsertarAlPpioLitCad(struct NodoLitCad**,char*,int);
-void insertarLitCad(struct NodoLitCad**,char*,int);
-
-    char* cad;
-    int longg;
-    struct NodoLitCad* listaLitCadena = NULL;
-
-//funciones para identificadores
    typedef struct Nodo {
-    char Palabra[20];
+    char* Palabra;
     int cantidad;
     struct Nodo* sgte;
 }NODO;
+//literales cadena
+NODO* CrearNodoLitCad(char*,int);
+ void InsertarAlPpioLitCad(NODO**,char*,int);
+ void insertarLitCad(NODO**,char*,int);
+
+    char* cad;
+    int longg;
+    NODO* listaLitCadena = NULL;
+//funciones para identificadores y comunes a otros tokens
 
 
-NODO* CrearNodo(char[]);
-void RecorrerLista(NODO*); 
+NODO* CrearNodo(char*);
+void RecorrerLista(NODO*,char); 
 int VerificarSiEstaVacia(NODO*);    
-int EstaElElemento(NODO*, char[]);
-void InsertarAlPpio(NODO** l, char[]);
-void insertarIdentOrdenado(NODO**, char[]);
+int EstaElElemento(NODO*, char*);
+void InsertarAlPpio(NODO** l, char*);
+void insertarIdentOrdenado(NODO**, char*);
 
-void insertarAlFinal(NODO**,char[]);
+void insertarAlFinal(NODO**,char*);
 void recorrerListaPalReserv(NODO*);
 
 //funciones para constantes
@@ -79,20 +69,24 @@ NODOCONST* listaConstantesCarac = NULL;
 long AuxConst;
 
 //funciones para operadores y caracteres de puntuacion
-void RecorrerListaOp(NODO*); 
-
-char op[20];
-char carPunt[20];
+char* op;
+char *carPunt;
 NODO*listaOpYCarPunt=NULL;
+//funciones para comentarios
 
+
+char *comentarioLinea;
+char *comentarioMultiple;
+
+NODO*listaComentLinea=NULL;
+NODO*listaComentMult=NULL;
 
 
 %}
 
 %{
-    char ids[20];
-    char palR[20];
-    // char* ids;
+    char* ids;
+    char *palR;
     NODO* listaIdentificadores = NULL;
     int contadorIdentificadores = 0;
     NODO* listaPalReserv = NULL;
@@ -101,8 +95,18 @@ NODO*listaOpYCarPunt=NULL;
 
 %%
 
-{COMENTARIO_LINEA} {printf("Encontre el comentario de linea : %s \n",yytext);}
-{COMENTARIO_COMPUESTO} {printf("Encontre el comentario compuesto : %s \n",yytext);}
+{COMENTARIO_LINEA} {
+                    comentarioLinea=yytext;
+                    insertarAlFinal(&listaComentLinea,comentarioLinea);
+                    fflush(stdin);
+
+}
+{COMENTARIO_MULTIPLE} {
+                        comentarioMultiple=yytext;
+                        insertarAlFinal(&listaComentMult,comentarioMultiple);
+                        fflush(stdin);
+
+}
 {CONSTANTE_DECIMAL} {printf("Encontre una constante decimal : %s \n" , yytext);}
 {CONSTANTE_OCTAL} {
                     AuxConst=strtol(yytext,NULL,8);
@@ -122,13 +126,13 @@ NODO*listaOpYCarPunt=NULL;
 }
 
 {PALABRAS_RESERVADAS} {
-                    strcpy(palR,yytext);
+                    palR=yytext;
                     insertarAlFinal(&listaPalReserv,palR);
                     fflush(stdin);
 }
 {CARACTER_SIMPLE} {printf("encontre el caracter: %s \n", yytext);}
 {IDENTIFICADOR} {
-                    strcpy(ids,yytext);
+                    ids=yytext;
                     insertarIdentOrdenado(&listaIdentificadores,ids);
                     fflush(stdin);
                 
@@ -137,13 +141,13 @@ NODO*listaOpYCarPunt=NULL;
 
 {DIRECTIVAALPRECOMPILADOR} {printf("Encontre la directiva al precompilador: %s \n ",yytext);}
 {CARACTER_DE_PUNTUACION} {
-                            strcpy(carPunt,yytext);
+                            carPunt=yytext;
                             insertarIdentOrdenado(&listaOpYCarPunt,carPunt);
                             fflush(stdin);
 
 }
 {OPERADOR}/{NUMERO} {
-                        strcpy(op,yytext);
+                        op=yytext;
                         insertarIdentOrdenado(&listaOpYCarPunt,op);
                         fflush(stdin);
 
@@ -160,15 +164,18 @@ int main(){
 
     //mostrar identificadores
     if (VerificarSiEstaVacia(listaIdentificadores)==0) {
-    RecorrerLista(listaIdentificadores);
+        char LISTAIDENTIFICADORES='A';
+    RecorrerLista(listaIdentificadores,LISTAIDENTIFICADORES);
     }
     //mostrar literales cadena
-    if (VerificarSiEstaVaciaLitCad(listaLitCadena)==0) {
-    RecorrerListaLitCad(listaLitCadena);
+    if (VerificarSiEstaVacia(listaLitCadena)==0) {
+        char LISTALITERALESCADENA='B';
+    RecorrerLista(listaLitCadena,LISTALITERALESCADENA);
     }
     //mostrar palabras reservadas
     if (VerificarSiEstaVacia(listaPalReserv)==0){
-        recorrerListaPalReserv(listaPalReserv);
+        char LISTAPALABRASRESERVADAS='C';
+        RecorrerLista(listaPalReserv,LISTAPALABRASRESERVADAS);
     }
     //mostrar octales
     if(VerificarSiEstaVaciaConst(listaConstantesOct)==0) {
@@ -179,29 +186,72 @@ int main(){
         mostrarHexa(listaConstantesHex);
     
 }
+
+
+
     //mostrar op y caracteres de punt
     if (VerificarSiEstaVacia(listaOpYCarPunt)==0) {
-    RecorrerListaOp(listaOpYCarPunt);
+        char LISTAOPERADORES='D';
+    RecorrerLista(listaOpYCarPunt,LISTAOPERADORES);
+    }
+     //mostrar comentarios
+    if (VerificarSiEstaVacia(listaComentLinea)==0) {
+        char LISTACOMENTARIOSLINEA='E';
+    RecorrerLista(listaComentLinea,LISTACOMENTARIOSLINEA);
+    }
+    if (VerificarSiEstaVacia(listaComentMult)==0) {
+        char LISTACOMENTARIOSMULTIPLE='F';
+    RecorrerLista(listaComentMult,LISTACOMENTARIOSMULTIPLE);
     }
 return 0;
 }
 
 // Funciones para identificadores
-NODO* CrearNodo(char palabra[]) {
+NODO* CrearNodo(char* palabra) {
     NODO* nuevo_nodo = NULL;
     nuevo_nodo = (NODO*) malloc(sizeof(NODO));
-    strcpy(nuevo_nodo->Palabra, palabra);
+    nuevo_nodo->Palabra=strdup(palabra);
     nuevo_nodo->cantidad = 1;
     nuevo_nodo->sgte = NULL;    
 }
 
-void RecorrerLista(NODO *l) {
+void RecorrerLista(NODO *l,char titulo) {
     NODO *aux = l;
-    printf("---- LISTA DE IDENTIFICADORES ----\n");
+    switch(titulo){
+        case 'A':
+        printf("---- LISTA DE IDENTIFICADORES----\n");
     while (aux != NULL) {
         printf("el id: %s aparece: %d veces\n",aux->Palabra,aux->cantidad);
         aux = aux->sgte; 
+    } break;
+    case 'B':printf("---- LISTA DE LITERALES CADENA----\n");
+    while (aux != NULL) {
+        printf("%s , longitud: %i \n",aux->Palabra,aux->cantidad);
+        aux = aux->sgte; 
+    } break;
+    case 'C':printf("---- LISTA DE PALABRAS RESERVADAS----\n");
+     while(aux != NULL) {
+        printf("%s \n",aux->Palabra);
+        aux = aux->sgte;
+    } break;
+    case 'D':printf("---- LISTA DE OPERADORES/CARACTERES DE PUNTUACION----\n");
+    while (aux != NULL) {
+        printf(" %s aparece: %d veces\n",aux->Palabra,aux->cantidad);
+        aux = aux->sgte; 
+    } break;
+    case 'E':printf("---- LISTA DE COMENTARIOS DE LINEA----\n");
+    while(aux != NULL) {
+        printf("%s \n",aux->Palabra);
+        aux = aux->sgte; 
+    } break;
+
+    case 'F':printf("---- LISTA DE COMENTARIOS DE MULTIPLES LINEAS----\n");
+    while(aux != NULL) {
+        printf("%s \n",aux->Palabra);
+        aux = aux->sgte; 
+    }break;
     }
+    printf("\n");
 }
 
 int VerificarSiEstaVacia(NODO* l){
@@ -211,7 +261,7 @@ int VerificarSiEstaVacia(NODO* l){
         return 0;
     }
     }
-void InsertarAlPpio(NODO** l, char palabra[]){
+void InsertarAlPpio(NODO** l, char* palabra){
     NODO* nuevo_nodo = NULL;
     nuevo_nodo = CrearNodo(palabra);
     nuevo_nodo->sgte = *l;
@@ -219,7 +269,7 @@ void InsertarAlPpio(NODO** l, char palabra[]){
 
 }
 
-void insertarIdentOrdenado(NODO** l, char palabra[]){
+void insertarIdentOrdenado(NODO** l, char* palabra){
         NODO* aux1 = *l;
         if (VerificarSiEstaVacia(aux1)){
             InsertarAlPpio(l,palabra);
@@ -250,7 +300,7 @@ void insertarIdentOrdenado(NODO** l, char palabra[]){
         }
 }
 
-int EstaElElemento(NODO*l, char palabra[]){
+int EstaElElemento(NODO*l, char* palabra){
     NODO* aux = l;
         do {
             if(strcmp(aux->Palabra,palabra) == 0){
@@ -268,62 +318,45 @@ int EstaElElemento(NODO*l, char palabra[]){
 
 //funciones para literales cadena
 
-struct NodoLitCad* CrearNodoLitCad(char* cadena,int longitud) {
-    struct NodoLitCad* nuevo_nodo = NULL;
-    nuevo_nodo = (struct NodoLitCad*) malloc(sizeof(struct NodoLitCad));
-    nuevo_nodo->cadena= strdup(cadena);
-    nuevo_nodo->longitud=longitud;
-    nuevo_nodo->sgte = NULL;    
-}
+NODO* CrearNodoLitCad(char* cadena,int longitud) {
+     NODO* nuevo_nodo = NULL;
+     nuevo_nodo = (NODO*) malloc(sizeof(NODO));
+     nuevo_nodo->Palabra= strdup(cadena);
+     nuevo_nodo->cantidad=longitud;
+     nuevo_nodo->sgte = NULL;    
+ }
 
-void RecorrerListaLitCad(struct NodoLitCad *lista) {
-    struct NodoLitCad *aux = lista;
-    printf("----LISTA DE LITERALES CADENA----\n");
-    while (aux != NULL) {
-        printf("%s , longitud: %i \n",aux->cadena,aux->longitud);
-        aux = aux->sgte; 
-    }
-}
+ void InsertarAlPpioLitCad(NODO** lista,char* cadena,int longitud){
+     NODO* nuevo_nodo = NULL;
+     nuevo_nodo = CrearNodoLitCad(cadena,longitud);
+     nuevo_nodo->sgte = *lista;
+     *lista = nuevo_nodo;
 
-int VerificarSiEstaVaciaLitCad(struct NodoLitCad* lista){
-    if (lista == NULL){
-    return 1;
-    } else {
-        return 0;
-    }
-    }
-void InsertarAlPpioLitCad(struct NodoLitCad** lista,char* cadena,int longitud){
-    struct NodoLitCad* nuevo_nodo = NULL;
-    nuevo_nodo = CrearNodoLitCad(cadena,longitud);
-    nuevo_nodo->sgte = *lista;
-    *lista = nuevo_nodo;
+ }
 
-}
-
-void insertarLitCad(struct NodoLitCad** lista,char* cadena,int longitud){
-        struct NodoLitCad* aux1 = *lista; 
-        if(VerificarSiEstaVaciaLitCad(aux1) == 1) {
-            InsertarAlPpioLitCad(lista,cadena,longitud);
-
-        } 
-        else {
-                struct NodoLitCad* aux2 = aux1->sgte;
-                while(aux1->sgte != NULL) {
-                    aux1 = aux1->sgte;
-                    aux2 = aux2->sgte;
-                }
-                if (aux2==NULL) {
-                    struct NodoLitCad* nuevo_nodo = NULL;
-                    nuevo_nodo = CrearNodoLitCad(cadena,longitud);
-                    aux1->sgte=nuevo_nodo;
-                } 
-            }
-        }
+ void insertarLitCad(NODO** lista,char* cadena,int longitud){
+         NODO* aux1 = *lista; 
+         if(VerificarSiEstaVacia(aux1) == 1) {
+             InsertarAlPpioLitCad(lista,cadena,longitud);
+         } 
+         else {
+                 NODO* aux2 = aux1->sgte;
+                 while(aux1->sgte != NULL) {
+                     aux1 = aux1->sgte;
+                     aux2 = aux2->sgte;
+                 }
+                 if (aux2==NULL) {
+                     NODO* nuevo_nodo = NULL;
+                     nuevo_nodo = CrearNodoLitCad(cadena,longitud);
+                     aux1->sgte=nuevo_nodo;
+                 } 
+             }
+         }
 
 //fin de literales cadena
 
 //Func para pal reservadas
-void insertarAlFinal(NODO**l, char palabra[]) {
+void insertarAlFinal(NODO**l, char* palabra) {
     NODO* nuevo_nodo = NULL;
     nuevo_nodo = CrearNodo(palabra);
     NODO* aux1 = *l;
@@ -337,15 +370,6 @@ void insertarAlFinal(NODO**l, char palabra[]) {
     }
 }
 
-void recorrerListaPalReserv(NODO* l) {
-    NODO* aux1 = l;
-    printf("----LISTA DE PALABRAS RESERVADAS----\n");
-    while(aux1 != NULL) {
-        printf("%s \n",aux1->Palabra);
-        aux1 = aux1->sgte;
-    }
-}
-//fin de pala reservadas
 
 //funciones constantes
 NODOCONST* CrearNodoConst(int c) {
@@ -396,14 +420,3 @@ void mostrarHexa(NODOCONST*c){
     }
 }
 
-//funciones para operadores y caracteres de puntuacion
-//usa muchas funciones de identificadores
-
-void RecorrerListaOp(NODO *listaOpYCarPunt) {
-    NODO *aux = listaOpYCarPunt;
-    printf("---- LISTA DE OPERADRES Y CARACTERES DE PUNTUACION ----\n");
-    while (aux != NULL) {
-        printf(" %s aparece: %d veces\n",aux->Palabra,aux->cantidad);
-        aux = aux->sgte; 
-    }
-}
