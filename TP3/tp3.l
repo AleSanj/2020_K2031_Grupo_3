@@ -1,5 +1,7 @@
+%option lex-compat
 %option noyywrap
 
+SALTO_DE_LINEA \n
 PALABRAS_RESERVADAS auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while
 CARACTER_DE_PUNTUACION "("|")"|"["|"]"|"{"|"}"|","|":"|"="|";"|"..."|"#"
 CONSTANTE_DECIMAL [1-9][0-9]*
@@ -9,11 +11,11 @@ CONSTANTE_REAL [1-9][0-9]*"."[0-9]*"E"?[\+\-]?[0-9]*
 LITERAL_CADENA \"[^\"]*\"
 CARACTER_SIMPLE "'"."'"
 IDENTIFICADOR ([a-zA-Z]|_)([a-zA-Z]|[0-9]|_)*
-OPERADOR "+"|"-"|"/"|"*"|"%"|"&&"|"||"|"¬"|">"|">="|"<"|"<="|"=="|"!="
+OPERADOR "+"|"-"|"/"|"*"|"%"|"&&"|\&|"||"|"¬"|">"|">="|"<"|"<="|"=="|"!="
 NUMERO [0-9]
-DIRECTIVAALPRECOMPILADOR "#"(define|elif|else|endif|error|if|ifdef|ifndef|include|message|undef)
 COMENTARIO_LINEA "//".*
 COMENTARIO_MULTIPLE \/\*(\*+[^\*\/]|[^\*])*\*+\/
+
 %{
     #include <stdio.h>
     #include <stdlib.h>
@@ -21,7 +23,7 @@ COMENTARIO_MULTIPLE \/\*(\*+[^\*\/]|[^\*])*\*+\/
 
    typedef struct Nodo {
     char* Palabra;
-    int cantidad;
+    int cantidad; //la usamos guardar la cantida de identificadores y para guardar la linea en la que estan los 
     struct Nodo* sgte;
 }NODO;
 //literales cadena
@@ -45,29 +47,31 @@ void insertarIdentOrdenado(NODO**, char*);
 void insertarAlFinal(NODO**,char*);
 void recorrerListaPalReserv(NODO*);
 
+
+NODO* CrearNodoNoRec(char*,int);
+void insertarAlFinalNoRec(NODO**,char*,int);
+
 //funciones para constantes
 typedef struct constantes {
     long constante;
-    int posicion;
+    float constanteF;
     struct constantes* sgte;
 }NODOCONST;
 
-NODOCONST* CrearNodoConst(int);
+NODOCONST* CrearNodoConst(long,float,char);
 int VerificarSiEstaVaciaConst(NODOCONST*);
-void InsertarAlFinalConst(NODOCONST**, long);
-// void mostrarOctales (NODOCONST*);
-// void mostrarHexa (NODOCONST*);
+void InsertarAlFinalConst(NODOCONST**, long,float,char);
+
 void mostrarctes(NODOCONST*,char);
-// void mostrarDecimal (NODOCONST*);
-void mostrarFloat (NODOCONST*);
 void mostrarCarac (NODOCONST*);
 
 NODOCONST* listaConstantesOct = NULL;
 NODOCONST* listaConstantesHex = NULL;
 NODOCONST* listaConstantesDec = NULL;
 NODOCONST* listaConstantesFloat = NULL;
-NODOCONST* listaConstantesCarac = NULL;
+NODO* listaConstantesCarac = NULL;
 long AuxConst;
+float AuxConstF;
 
 //funciones para operadores y caracteres de puntuacion
 char* op;
@@ -75,12 +79,14 @@ char *carPunt;
 NODO*listaOpYCarPunt=NULL;
 //funciones para comentarios
 
-
 char *comentarioLinea;
 char *comentarioMultiple;
 
 NODO*listaComentLinea=NULL;
 NODO*listaComentMult=NULL;
+NODO*listaNoRec=NULL;
+//Numero de linea
+int numeroDeLinea = 1; 
 
 
 %}
@@ -95,7 +101,7 @@ NODO*listaComentMult=NULL;
 %}
 
 %%
-
+{SALTO_DE_LINEA} {}
 {COMENTARIO_LINEA} {
                     comentarioLinea=yytext;
                     insertarAlFinal(&listaComentLinea,comentarioLinea);
@@ -103,62 +109,71 @@ NODO*listaComentMult=NULL;
 
 }
 {COMENTARIO_MULTIPLE} {
-                        comentarioMultiple=yytext;
-                        insertarAlFinal(&listaComentMult,comentarioMultiple);
-                        fflush(stdin);
+                    comentarioMultiple=yytext;
+                    insertarAlFinal(&listaComentMult,comentarioMultiple);
+                    fflush(stdin);
 
 }
 {CONSTANTE_DECIMAL} {
-                        AuxConst=strtol(yytext,NULL,10);
-                        InsertarAlFinalConst(&listaConstantesDec,AuxConst);
+                    AuxConst=strtol(yytext,NULL,10);
+                    InsertarAlFinalConst(&listaConstantesDec,AuxConst,0,'A');
+                    fflush(stdin);
 }
 {CONSTANTE_OCTAL} {
                     AuxConst=strtol(yytext,NULL,8);
-                    InsertarAlFinalConst(&listaConstantesOct,AuxConst);
+                    InsertarAlFinalConst(&listaConstantesOct,AuxConst,0,'A');
+                    fflush(stdin);
 
 }
 {CONSTANTE_HEXADECIMAL} {
                     AuxConst = strtol(yytext,NULL,16);
-                    InsertarAlFinalConst(&listaConstantesHex,AuxConst);
+                    InsertarAlFinalConst(&listaConstantesHex,AuxConst,0,'A');
+                    fflush(stdin);
 }
-{CONSTANTE_REAL} {printf("Encontre una constante real : %s\n",yytext);}
+{CONSTANTE_REAL} {
+                    AuxConstF=atof(yytext);
+                    printf("%f - ",AuxConstF);
+                    InsertarAlFinalConst(&listaConstantesFloat,0,AuxConstF,'B');
+                    fflush(stdin);
+}
 {LITERAL_CADENA} {  
                     cad=yytext;
                     longg=yyleng-2;
                     insertarLitCad(&listaLitCadena,cad,longg);
-
+                    fflush(stdin);
 }
-
 {PALABRAS_RESERVADAS} {
                     palR=yytext;
                     insertarAlFinal(&listaPalReserv,palR);
                     fflush(stdin);
 }
-{CARACTER_SIMPLE} {printf("encontre el caracter: %s \n", yytext);}
+{CARACTER_SIMPLE} {
+                    ids=yytext;
+                    insertarAlFinal(&listaConstantesCarac,ids);
+                    fflush(stdin);
+
+
+}
 {IDENTIFICADOR} {
                     ids=yytext;
                     insertarIdentOrdenado(&listaIdentificadores,ids);
                     fflush(stdin);
-                
-        
  }
-
-{DIRECTIVAALPRECOMPILADOR} {printf("Encontre la directiva al precompilador: %s \n ",yytext);}
 {CARACTER_DE_PUNTUACION} {
                             carPunt=yytext;
                             insertarIdentOrdenado(&listaOpYCarPunt,carPunt);
                             fflush(stdin);
-
 }
-{OPERADOR}/{NUMERO} {
+{OPERADOR} {
                         op=yytext;
                         insertarIdentOrdenado(&listaOpYCarPunt,op);
                         fflush(stdin);
-
 }
-. {printf("%s\n",yytext);}
+[^" "] {
+                        ids=yytext;
+                        insertarAlFinalNoRec(&listaNoRec,ids,yylineno);
+}
 %%
-
 
 int main(){
     
@@ -184,14 +199,16 @@ int main(){
     }
     //mostrar Hexadecimales
     if(VerificarSiEstaVaciaConst(listaConstantesHex)==0) {
-        mostrarctes(listaConstantesHex,'H');
+        mostrarctes(listaConstantesHex,'H');}
     //mostrar decimales
     if(VerificarSiEstaVaciaConst(listaConstantesDec)==0){
         mostrarctes(listaConstantesDec,'D');
     }
-}
-
-
+    //mostrar REALES
+    if(VerificarSiEstaVaciaConst(listaConstantesFloat)==0){
+        mostrarctes(listaConstantesFloat,'F');
+        
+    }
 
     //mostrar op y caracteres de punt
     if (VerificarSiEstaVacia(listaOpYCarPunt)==0) {
@@ -203,6 +220,14 @@ int main(){
     }
     if (VerificarSiEstaVacia(listaComentMult)==0) {
     RecorrerLista(listaComentMult,'F');
+    }
+    //mostrar constantes caracter
+    if (VerificarSiEstaVacia(listaConstantesCarac)==0) {
+    RecorrerLista(listaConstantesCarac,'G');
+    }
+    //mostrar caracteres no reconocidos
+    if (VerificarSiEstaVacia(listaNoRec)==0){
+        RecorrerLista(listaNoRec,'H');
     }
 return 0;
 }
@@ -227,7 +252,7 @@ void RecorrerLista(NODO *l,char titulo) {
     } break;
     case 'B':printf("---- LISTA DE LITERALES CADENA----\n");
     while (aux != NULL) {
-        printf("%s , longitud: %i \n",aux->Palabra,aux->cantidad);
+        printf("lit cadena: %s , longitud: %i \n",aux->Palabra,aux->cantidad);
         aux = aux->sgte; 
     } break;
     case 'C':printf("---- LISTA DE PALABRAS RESERVADAS----\n");
@@ -251,8 +276,23 @@ void RecorrerLista(NODO *l,char titulo) {
         printf("%s \n",aux->Palabra);
         aux = aux->sgte; 
     }break;
+    case 'G': printf("---LISTA DE CARACTERES SIMPLES---\n");
+    int i=1;
+    while(aux != NULL) {
+        printf("%i. %s \n",i,aux->Palabra);
+        i++;
+        aux = aux->sgte; 
+    }break;
+    case 'H': printf("---LISTA DE CARACTERES NO RECONOCIDOS---\n");
+    while(aux != NULL) {
+        printf("caracter no reconocido: %s, linea nro: %i.  \n",aux->Palabra,aux->cantidad);
+        aux = aux->sgte; 
+    }break;
     }
     printf("\n");
+
+
+
 }
 
 int VerificarSiEstaVacia(NODO* l){
@@ -373,11 +413,20 @@ void insertarAlFinal(NODO**l, char* palabra) {
 
 
 //funciones constantes
-NODOCONST* CrearNodoConst(int c) {
+NODOCONST* CrearNodoConst(long c,float f, char titulo) {
+    if (titulo == 'A') {
+
     NODOCONST* nuevo_nodo = NULL;
     nuevo_nodo = (NODOCONST*) malloc(sizeof(NODOCONST));
     nuevo_nodo->constante = c;
     nuevo_nodo->sgte = NULL;
+    } 
+    if(titulo=='B'){
+    NODOCONST* nuevo_nodo = NULL;
+    nuevo_nodo = (NODOCONST*) malloc(sizeof(NODOCONST));
+    nuevo_nodo->constanteF = f;
+    nuevo_nodo->sgte = NULL;
+    }
     
 }
 
@@ -388,34 +437,53 @@ int VerificarSiEstaVaciaConst(NODOCONST*c){
         return 0;
     }
 }
-void InsertarAlFinalConst(NODOCONST**c,long numero){
+void InsertarAlFinalConst(NODOCONST**c,long numero,float numeroF, char titulo){
     NODOCONST* aux1 = *c;
     NODOCONST* nuevo_nodo = NULL;
-    nuevo_nodo = CrearNodoConst(numero);
+    switch(titulo){
+            case 'A':
+        nuevo_nodo = CrearNodoConst(numero,numeroF,titulo);
 
-    if (VerificarSiEstaVaciaConst(aux1)==1){
-        *c = nuevo_nodo;
-    } else {
-        while (aux1->sgte != NULL) {
-            aux1 = aux1->sgte;
+        if (VerificarSiEstaVaciaConst(aux1)==1){
+            *c = nuevo_nodo;
+        } else {
+            while (aux1->sgte != NULL) {
+                aux1 = aux1->sgte;
+            }
+            aux1->sgte = nuevo_nodo;
+        } break;
+        case 'B':
+        nuevo_nodo = CrearNodoConst(numero,numeroF,titulo);
+        if (VerificarSiEstaVaciaConst(aux1)==1){
+            *c = nuevo_nodo;
+        } else {
+            while (aux1->sgte != NULL) {
+                aux1 = aux1->sgte;
+            }
+            aux1->sgte = nuevo_nodo; 
+        
+        break;
         }
-        aux1->sgte = nuevo_nodo;
     }
 }
+   
 
 void mostrarctes(NODOCONST*c,char titulo){
     NODOCONST* aux1 = c;
     switch(titulo){
+
         case 'O': printf("----CONSTANTES OCTALES----\n");
     while(aux1 != NULL ) {
         printf("Constante octal: %o, En decimal: %d\n",aux1->constante,aux1->constante);
         aux1= aux1->sgte;
     }break;
+
     case 'H':printf("----CONSTANTES HEXADECIMALES----\n");
     while(aux1 != NULL ) {
         printf("Constante hexadecimal: %X, En decimal: %d\n",aux1->constante,aux1->constante);
         aux1= aux1->sgte;
     } break;
+
     case 'D': 
     printf("----CONSTANTES DECIMALES----\n");
     int contador=0;
@@ -426,6 +494,42 @@ void mostrarctes(NODOCONST*c,char titulo){
     }
     printf("La suma de todas las constantes decimales es: %d\n",contador);
     break;
+    
+    case 'F': 
+    printf("----CONSTANTES FLOTANTES----\n");
+    while(aux1 != NULL ) {
+        float a = aux1->constanteF;
+        int b = (int) a;
+        float c = a-b;
+        printf("Constante flotante: %f, parte entera: %d, mantisa: %f\n",aux1->constanteF,b,c);
+        aux1= aux1->sgte;
+    }
+    break;
     }
     printf("\n");
+    }
+    
+
+    void insertarAlFinalNoRec(NODO**l, char* palabra,int linea) {
+    NODO* nuevo_nodo = NULL;
+    nuevo_nodo = CrearNodoNoRec(palabra,linea);
+    NODO* aux1 = *l;
+    if (aux1 == NULL) {
+        nuevo_nodo->sgte = *l;
+        *l=nuevo_nodo;
+        
+    } else{
+    while(aux1->sgte != NULL) {
+        aux1 = aux1->sgte;
+    }
+    aux1->sgte = nuevo_nodo;
+    }
+}
+
+NODO* CrearNodoNoRec(char* palabra,int linea) {
+    NODO* nuevo_nodo = NULL;
+    nuevo_nodo = (NODO*) malloc(sizeof(NODO));
+    nuevo_nodo->Palabra=strdup(palabra);
+    nuevo_nodo->cantidad = linea;
+    nuevo_nodo->sgte = NULL;    
 }
