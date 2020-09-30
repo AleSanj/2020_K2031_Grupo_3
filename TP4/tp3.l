@@ -20,159 +20,169 @@ COMENTARIO_MULTIPLE \/\*(\*+[^\*\/]|[^\*])*\*+\/
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
+    #include "tp4.tab.h"
+//    typedef struct Nodo {
+//     char* Palabra;
+//     int cantidad; //la usamos guardar la cantida de identificadores y para guardar la linea en la que estan los 
+//     struct Nodo* sgte;
+// }NODO;
+// //literales cadena
+// NODO* CrearNodoLitCad(char*,int);
+//  void InsertarAlPpioLitCad(NODO**,char*,int);
+//  void insertarLitCad(NODO**,char*,int);
 
-   typedef struct Nodo {
-    char* Palabra;
-    int cantidad; //la usamos guardar la cantida de identificadores y para guardar la linea en la que estan los 
-    struct Nodo* sgte;
-}NODO;
-//literales cadena
-NODO* CrearNodoLitCad(char*,int);
- void InsertarAlPpioLitCad(NODO**,char*,int);
- void insertarLitCad(NODO**,char*,int);
-
-    char* cad;
-    int longg;
-    NODO* listaLitCadena = NULL;
-//funciones para identificadores y comunes a otros tokens
-
-
-NODO* CrearNodo(char*);
-void RecorrerLista(NODO*,char); 
-int VerificarSiEstaVacia(NODO*);    
-int EstaElElemento(NODO*, char*);
-void InsertarAlPpio(NODO** l, char*);
-void insertarIdentOrdenado(NODO**, char*);
-
-void insertarAlFinal(NODO**,char*);
-void recorrerListaPalReserv(NODO*);
+//     char* cad;
+//     int longg;
+//     NODO* listaLitCadena = NULL;
+// //funciones para identificadores y comunes a otros tokens
 
 
-NODO* CrearNodoNoRec(char*,int);
-void insertarAlFinalNoRec(NODO**,char*,int);
+// NODO* CrearNodo(char*);
+// void RecorrerLista(NODO*,char); 
+// int VerificarSiEstaVacia(NODO*);    
+// int EstaElElemento(NODO*, char*);
+// void InsertarAlPpio(NODO** l, char*);
+// void insertarIdentOrdenado(NODO**, char*);
 
-//funciones para constantes
-typedef struct constantes {
-    long constante;
-    float constanteF;
-    struct constantes* sgte;
-}NODOCONST;
+// void insertarAlFinal(NODO**,char*);
+// void recorrerListaPalReserv(NODO*);
 
-NODOCONST* CrearNodoConst(long,float,char);
-int VerificarSiEstaVaciaConst(NODOCONST*);
-void InsertarAlFinalConst(NODOCONST**, long,float,char);
 
-void mostrarctes(NODOCONST*,char);
-void mostrarCarac (NODOCONST*);
+// NODO* CrearNodoNoRec(char*,int);
+// void insertarAlFinalNoRec(NODO**,char*,int);
 
-NODOCONST* listaConstantesOct = NULL;
-NODOCONST* listaConstantesHex = NULL;
-NODOCONST* listaConstantesDec = NULL;
-NODOCONST* listaConstantesFloat = NULL;
-NODO* listaConstantesCarac = NULL;
-long AuxConst;
-float AuxConstF;
+// //funciones para constantes
+// typedef struct constantes {
+//     long constante;
+//     float constanteF;
+//     struct constantes* sgte;
+// }NODOCONST;
 
-//funciones para operadores y caracteres de puntuacion
-char* op;
-char *carPunt;
-NODO*listaOpYCarPunt=NULL;
-//funciones para comentarios
+// NODOCONST* CrearNodoConst(long,float,char);
+// int VerificarSiEstaVaciaConst(NODOCONST*);
+// void InsertarAlFinalConst(NODOCONST**, long,float,char);
 
-char *comentarioLinea;
-char *comentarioMultiple;
+// void mostrarctes(NODOCONST*,char);
+// void mostrarCarac (NODOCONST*);
 
-NODO*listaComentLinea=NULL;
-NODO*listaComentMult=NULL;
-NODO*listaNoRec=NULL;
-//Numero de linea
-int numeroDeLinea = 1; 
+// NODOCONST* listaConstantesOct = NULL;
+// NODOCONST* listaConstantesHex = NULL;
+// NODOCONST* listaConstantesDec = NULL;
+// NODOCONST* listaConstantesFloat = NULL;
+// NODO* listaConstantesCarac = NULL;
+// long AuxConst;
+// float AuxConstF;
+
+// //funciones para operadores y caracteres de puntuacion
+// char* op;
+// char *carPunt;
+// NODO*listaOpYCarPunt=NULL;
+// //funciones para comentarios
+
+// char *comentarioLinea;
+// char *comentarioMultiple;
+
+// NODO*listaComentLinea=NULL;
+// NODO*listaComentMult=NULL;
+// NODO*listaNoRec=NULL;
+// //Numero de linea
+// int numeroDeLinea = 1; 
 
 
 %}
 
 %{
-    char* ids;
-    char *palR;
-    NODO* listaIdentificadores = NULL;
-    int contadorIdentificadores = 0;
-    NODO* listaPalReserv = NULL;
+    // char* ids;
+    // char *palR;
+    // NODO* listaIdentificadores = NULL;
+    // int contadorIdentificadores = 0;
+    // NODO* listaPalReserv = NULL;
 
 %}
 
 %%
+%{
+//PALABRAS RESERVADAS
+%}
+"break"    {return BREAK;}
+"case"     {return CASE;}
+"char"     {return CHAR;}
+"const"    {return CONST;}
+"default"  {return DEFAULT;}
+"do"       {return DO;}
+"double"   {return DOUBLE;}
+"else"     {return ELSE;}
+"enum"     {return ENUM;}
+"float"    {return FLOAT;}
+"for"      {return FOR;}
+"if"       {return IF;}
+"int"      {return INT;}
+"long"     {return LONG;}
+"return"   {return RETURN;}
+"short"    {return SHORT;}
+"signed"   {return SIGNED;}
+"sizeof"   {return SIZEOF;}
+"struct"   {return STRUCT;}
+"switch"   {return SWITCH;}
+"typedef"  {return TYPEDEF;}
+"union"    {return UNION;}
+"unsigned" {return UNSIGNED;}
+"void"     {return VOID;}
+"while"    {return WHILE;}
+
+
+")"        {return ')';}
+"["        {return '[';}
+"}"        {return '}';}
+"]"        {return ']';}
+","        {return ',';}
+":"        {return ':';}
+"="        {return '=';}
+";"        {return ';';}
+"("        {return '(';}
+"{"        {return '{';}
+
+
+
+{CONSTANTE_DECIMAL}       {return CTEDEC;}
+{CONSTANTE_OCTAL}         {return CTEOCT;}
+{CONSTANTE_HEXADECIMAL}   {return CTEHEX;}
+{CONSTANTE_REAL}          {return CTEREAL;}
+{LITERAL_CADENA}          {return LITCAD;}
+{CARACTER_SIMPLE}         {return CARACTER;}
+{IDENTIFICADOR}           {return ID;}
+
+
+"+"      {return '+';}
+"-"      {return '-';}
+"/"      {return '/';}
+"*"      {return '*';}
+"%"      {return '%';}
+"&&"     {return AND;}
+"||"     {return OR;}
+">"      {return '>';}
+">="     {return MAYORIGUAL;}
+"<"      {return '<';}
+"<="     {return MENORIGUAL;}
+"=="     {return IGUALDAD;}
+"!="     {return DESIGUALDAD;}
+"++"     {return INCREMENTO;}
+"--"     {return DECREMENTO;}
+"->"     {return PUNTERO}
+"."      {return '.';}
+"!"      {return '!';}
+"*="     {return MULTIPLICAR;}
+"/="     {return DIVIDIR;}
+"+="     {return SUMAR;}
+"-="     {return RESTAR;}
+
+
+
+{COMENTARIO_LINEA}
+{COMENTARIO_MULTIPLE}
+
 {SALTO_DE_LINEA} {}
-{COMENTARIO_LINEA} {
-                    comentarioLinea=yytext;
-                    insertarAlFinal(&listaComentLinea,comentarioLinea);
-                    fflush(stdin);
 
-}
-{COMENTARIO_MULTIPLE} {
-                    comentarioMultiple=yytext;
-                    insertarAlFinal(&listaComentMult,comentarioMultiple);
-                    fflush(stdin);
-
-}
-{CONSTANTE_DECIMAL} {
-                    AuxConst=strtol(yytext,NULL,10);
-                    InsertarAlFinalConst(&listaConstantesDec,AuxConst,0,'A');
-                    fflush(stdin);
-}
-{CONSTANTE_OCTAL} {
-                    AuxConst=strtol(yytext,NULL,8);
-                    InsertarAlFinalConst(&listaConstantesOct,AuxConst,0,'A');
-                    fflush(stdin);
-
-}
-{CONSTANTE_HEXADECIMAL} {
-                    AuxConst = strtol(yytext,NULL,16);
-                    InsertarAlFinalConst(&listaConstantesHex,AuxConst,0,'A');
-                    fflush(stdin);
-}
-{CONSTANTE_REAL} {
-                    AuxConstF=atof(yytext);
-                    printf("%f - ",AuxConstF);
-                    InsertarAlFinalConst(&listaConstantesFloat,0,AuxConstF,'B');
-                    fflush(stdin);
-}
-{LITERAL_CADENA} {  
-                    cad=yytext;
-                    longg=yyleng-2;
-                    insertarLitCad(&listaLitCadena,cad,longg);
-                    fflush(stdin);
-}
-{PALABRAS_RESERVADAS} {
-                    palR=yytext;
-                    insertarAlFinal(&listaPalReserv,palR);
-                    fflush(stdin);
-}
-{CARACTER_SIMPLE} {
-                    ids=yytext;
-                    insertarAlFinal(&listaConstantesCarac,ids);
-                    fflush(stdin);
-
-
-}
-{IDENTIFICADOR} {
-                    ids=yytext;
-                    insertarIdentOrdenado(&listaIdentificadores,ids);
-                    fflush(stdin);
- }
-{CARACTER_DE_PUNTUACION} {
-                            carPunt=yytext;
-                            insertarIdentOrdenado(&listaOpYCarPunt,carPunt);
-                            fflush(stdin);
-}
-{OPERADOR} {
-                        op=yytext;
-                        insertarIdentOrdenado(&listaOpYCarPunt,op);
-                        fflush(stdin);
-}
-[^" "] {
-                        ids=yytext;
-                        insertarAlFinalNoRec(&listaNoRec,ids,yylineno);
-}
 %%
 
 int main(){
