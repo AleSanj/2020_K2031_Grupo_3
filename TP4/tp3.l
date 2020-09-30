@@ -113,6 +113,7 @@ COMENTARIO_MULTIPLE \/\*(\*+[^\*\/]|[^\*])*\*+\/
 "double"   {return DOUBLE;}
 "else"     {return ELSE;}
 "enum"     {return ENUM;}
+"goto"     {return GOTO;}
 "float"    {return FLOAT;}
 "for"      {return FOR;}
 "if"       {return IF;}
@@ -129,6 +130,11 @@ COMENTARIO_MULTIPLE \/\*(\*+[^\*\/]|[^\*])*\*+\/
 "unsigned" {return UNSIGNED;}
 "void"     {return VOID;}
 "while"    {return WHILE;}
+"static"   {return STATIC;}
+"auto"     {return AUTO;}
+"register" {return REGISTER;}
+"extern"   {return EXTERN;}
+"volatile" {return VOLATILE;}
 
 
 ")"        {return ')';}
@@ -175,7 +181,11 @@ COMENTARIO_MULTIPLE \/\*(\*+[^\*\/]|[^\*])*\*+\/
 "/="     {return DIVIDIR;}
 "+="     {return SUMAR;}
 "-="     {return RESTAR;}
-
+"%="     {return PORCENTAJE;}
+"|"      {return '|';}
+"^"      {return '^';}
+"<<"     {return DESPLAZIZQ;}
+">>"     {return DESPLAZDER;}
 
 
 {COMENTARIO_LINEA}
