@@ -13,7 +13,7 @@ float nrocoma;
 
 %token <nro> CTEDEC CTEOCT CTEHEX 
 %token <nrocoma> CTEREAL
-%token <cadena>  BREAK CASE CHAR CONST DEFAULT DO DOUBLE ELSE ENUM FLOAT FOR IF INT LONG RETURN 
+%token <cadena>  BREAK CASE CHAR CONST DEFAULT DO DOUBLE ELSE ENUM FLOAT FOR IF INT LONG RETURN CONTINUE
 %token <cadena>  VOLATILE STATIC AUTO REGISTER EXTERN SHORT SIGNED SIZEOF STRUCT SWITCH TYPEDEF UNION UNSIGNED VOID WHILE GOTO
 %token <cadena> LITCAD ID AND OR MAYORIGUAL MENORIGUAL PORCENTAJE IGUALDAD DESIGUALDAD INCREMENTO DECREMENTO 
 %token <cadena> PUNTERO DESPLAZDER DESPLAZIZQ MULTIPLICAR DIVIDIR SUMAR RESTAR
@@ -22,7 +22,7 @@ float nrocoma;
 //seccion reglas
 %% 
 /*SENTENCIAS*/
-sentencia:            sentenciaExp
+sentencia:            sentenciaExp 
                     | sentenciaCompuesta
                     | sentenciaSeleccion
                     | sentenciaIteracion
@@ -32,12 +32,14 @@ sentencia:            sentenciaExp
 sentenciaExp:         //vacio
                     | exp ';'
 ;
-sentenciaCompuesta:  '{' (//vacio | listaDeclaraciones) (listaSentencias | //vacio) '}'
+sentenciaCompuesta:  '{' listaDeclaraciones listaSentencias '}'
 ;
-listaDeclaraciones:   declaracion 
+listaDeclaraciones:   
+                    | declaracion 
                     | listaDeclaraciones declaracion
 ;
-listaSentencias:      sentencia
+listaSentencias:      
+                    | sentencia
                     | listaSentencias sentencia
 ;
 sentenciaSeleccion:   IF '(' exp ')' sentencia
@@ -46,7 +48,7 @@ sentenciaSeleccion:   IF '(' exp ')' sentencia
 ;
 sentenciaIteracion:   WHILE '(' exp ')' sentencia
                     | DO sentencia WHILE '(' exp ')' ';'
-                    | FOR '(' (//vacio | exp) ';' (//vacio | exp) ';' (//vacio | exp) ')' sentencia
+                    | FOR '(' exp ';' exp ';' exp ')' sentencia
 ;  
 sentenciaEtiquetada:  CASE expCte ':' sentencia
                     | DEFAULT ':' sentencia
@@ -54,209 +56,226 @@ sentenciaEtiquetada:  CASE expCte ':' sentencia
 ;
 sentenciaSalto:       CONTINUE ';'
                     | BREAK ';'
-                    | RETURN (exp | //vacio) ';'
+                    | RETURN exp ';'
                     | GOTO ID ';'
 ;
 /*EXPRESIONES*/
-exp: expAsignacion
-    | exp ',' expAsignacion
+exp:                  
+                    | expAsignacion
+                    | exp ',' expAsignacion
 ;
-expAsignacion: expCondicional
-    | expUnaria opAsignacion expAsignacion
+expAsignacion:        expCondicional
+                    | expUnaria opAsignacion expAsignacion
 ;
-expCondicional: expOLogico
-| expOLogico '?' exp ':' expCondicional
+expCondicional:       expOLogico
+                    | expOLogico '?' exp ':' expCondicional
 ;
-opAsignacion: '='
-| MULTIPLICAR
-| DIVIDIR
-| PORCENTAJE
-| SUMAR
-| RESTAR
+opAsignacion:         '='
+                    | MULTIPLICAR
+                    | DIVIDIR
+                    | PORCENTAJE
+                    | SUMAR
+                    | RESTAR
 ;
-expOLogico: expYLogico
-| expOLogico OR expYLogico
+expOLogico:           expYLogico
+                    | expOLogico OR expYLogico
 ;
-expYLogico: expOInclusivo
-| expYLogico AND expOInclusivo
+expYLogico:           expOInclusivo
+                    | expYLogico AND expOInclusivo
 ;
-expOInclusivo: expOExcluyente
-    | expOInclusivo '|' expOExcluyente
+expOInclusivo:        expOExcluyente
+                    | expOInclusivo '|' expOExcluyente
 ;
-expOExcluyente: expY
-    | expOExcluyente '^' expY
+expOExcluyente:       expY
+                    | expOExcluyente '^' expY
 ;
-expY: expIgualdad
-| expY '&' expIgualdad
+expY:                 expIgualdad
+                    | expY '&' expIgualdad
 ;
-expIgualdad: expRelacional
-| expIgualdad IGUALDAD expRelacional
-| expIgualdad DESIGUALDAD expRelacional
+expIgualdad:          expRelacional
+                    | expIgualdad IGUALDAD expRelacional
+                    | expIgualdad DESIGUALDAD expRelacional
 ;
-expRelacional: expCorrimiento
- | expRelacional '<' expCorrimiento
- | expRelacional '>' expCorrimiento 
- | expRelacional MENORIGUAL expCorrimiento 
- | expRelacional MAYORIGUAL expCorrimiento
+expRelacional:        expCorrimiento
+                    | expRelacional '<' expCorrimiento
+                    | expRelacional '>' expCorrimiento 
+                    | expRelacional MENORIGUAL expCorrimiento 
+                    | expRelacional MAYORIGUAL expCorrimiento
 ;
-expCorrimiento: expAdd 
-| expCorrimiento DESPLAZIZQ expAdd 
-| expCorrimiento DESPLAZDER expAdd
+expCorrimiento:       expAdd 
+                    | expCorrimiento DESPLAZIZQ expAdd 
+                    | expCorrimiento DESPLAZDER expAdd
 ;
-expAdd: expMultipl
- | expAdd '+' expMultipl 
- | expAdd '-' expMultipl
+expAdd:               expMultipl
+                    | expAdd '+' expMultipl 
+                    | expAdd '-' expMultipl
 ;
-expMultipl: expConversion 
-| expMultipl '*' expConversion 
-| expMultipl '/' expConversion 
-| expMultipl '%' expConversion
+expMultipl:           expConversion 
+                    | expMultipl '*' expConversion 
+                    | expMultipl '/' expConversion 
+                    | expMultipl '%' expConversion
 ;
-expConversion: expUnaria 
-| '(' nameTipo ')' expConversion
+expConversion:        expUnaria 
+                    | '(' nameTipo ')' expConversion
 ;
-expUnaria: expSufijo 
-| INCREMENTO expUnaria 
-| DECREMENTO expUnaria 
-| opUnario expConversion
-| SIZEOF expUnaria
-| SIZEOF '(' nameTipo ')'
+expUnaria:            expSufijo 
+                    | INCREMENTO expUnaria 
+                    | DECREMENTO expUnaria 
+                    | opUnario expConversion
+                    | SIZEOF expUnaria
+                    | SIZEOF '(' nameTipo ')'
 ;
-opUnario: '&'|'*'|'+'|'-'|'!'
+opUnario:            '&'|'*'|'+'|'-'|'!'
 ;
-expSufijo: expPrim 
-| expSufijo '[' exp ']' /*arreglo*/
-| expSufijo '(' (listaArgum | /*vacio*/) ')' /* invocación */
-| expSufijo '.' ID 
-| expSufijo PUNTERO ID 
-| expSufijo INCREMENTO 
-| expSufijo DECREMENTO
+expSufijo:            expPrim 
+                    | expSufijo '[' exp ']' /*arreglo*/
+                    | expSufijo '(' listaArgum ')' /* invocación */
+                    | expSufijo '.' ID 
+                    | expSufijo PUNTERO ID 
+                    | expSufijo INCREMENTO 
+                    | expSufijo DECREMENTO
 ;
-listaArgum: expAsignacion 
-| listaArgum ',' expAsignacion
+listaArgum:           
+                    | expAsignacion 
+                    | listaArgum ',' expAsignacion
 ;
-expPrim: ID 
-| CTEDEC
-| CTEHEX
-| CTEOCT
-| CTEREAL
-| LITCAD
-| '(' exp ')'
+expPrim:              ID 
+                    | CTEDEC
+                    | CTEHEX
+                    | CTEOCT
+                    | CTEREAL
+                    | LITCAD
+                    | '(' exp ')'
 ;
-expCte: expCondicional
+expCte:               
+                    |expCondicional
 ;
 
 /*DECLARACIONES*/
 
-declaracion: especificDeclaracion (listaDeclaradores | /*vacio*/)
+declaracion:          especificDeclaracion listaDeclaradores
 ;
-especificDeclaracion:
-especificClaseAlmacenam (especificDeclaracion | /*vacio*/) 
-| especificTipo (especificDeclaracion | /*vacio*/) 
-| calificTipo (especificDeclaracion | /*vacio*/)
+especificDeclaracion: 
+                    | especificClaseAlmacenam especificDeclaracion 
+                    | especificTipo especificDeclaracion 
+                    | calificTipo especificDeclaracion 
 ;
-listaDeclaradores: declarador 
-| listaDeclaradores ',' declarador
+listaDeclaradores:    
+                    | declarador 
+                    | listaDeclaradores ',' declarador
 ;
-declarador: decla 
-| decla '=' inicializador
+declarador:           decla 
+                    | decla '=' inicializador
 ;
-inicializador: expAsignacion /* Inicialización de tipos escalares */
-| '{' listaInicializadores '}' /* Inicialización de tipos estructurados */
-| '{' listaInicializadores ',' '}'
+inicializador:        expAsignacion /* Inicialización de tipos escalares */
+                    | '{' listaInicializadores '}' /* Inicialización de tipos estructurados */
+                    | '{' listaInicializadores ',' '}'
 ;
 listaInicializadores: inicializador 
-| listaInicializadores ',' inicializador
+                    | listaInicializadores ',' inicializador
 ;
-especificClaseAlmacenam: TYPEDEF
-| STATIC 
-| AUTO
-| REGISTER 
-| EXTERN
+especificClaseAlmacenam:
+                      TYPEDEF
+                    | STATIC 
+                    | AUTO
+                    | REGISTER 
+                    | EXTERN
 ;
-especificTipo: VOID 
-| CHAR 
-| SHORT 
-| INT 
-| LONG 
-| FLOAT 
-| DOUBLE 
-| SIGNED
-| UNSIGNED
-| especificStructOUnion
-| especificEnum
-| nameTypedef
+especificTipo:        VOID 
+                    | CHAR 
+                    | SHORT 
+                    | INT 
+                    | LONG 
+                    | FLOAT 
+                    | DOUBLE 
+                    | SIGNED
+                    | UNSIGNED
+                    | especificStructOUnion
+                    | especificEnum
+                    | nameTypedef
 ;
-calificTipo: CONST
-| VOLATILE 
+calificTipo:          CONST
+                    | VOLATILE 
 ;
-especificStructOUnion: structOUnion (ID | /*VACIO*/) '{' listaDeclarStruct '}' 
-| structOUnion ID
+especificStructOUnion: 
+                      structOUnion identificador '{' listaDeclarStruct '}' 
+                    | structOUnion ID
 ;
-structOUnion: STRUCT
-| UNION 
+identificador:        
+                    | ID {printf("holis");}
 ;
-listaDeclarStruct: declaracionStruct 
-| listaDeclarStruct declaracionStruct
+structOUnion:         STRUCT
+                    | UNION 
 ;
-declaracionStruct: listaCalificadores declaradoresStruct ';'
+listaDeclarStruct:    declaracionStruct 
+                    | listaDeclarStruct declaracionStruct
 ;
-listaCalificadores: especificTipo (listaCalificadores | /*vacio*/) 
-| calificTipo (listaCalificadores | /*vacio*/)
+declaracionStruct:    listaCalificadores declaradoresStruct ';'
 ;
-declaradoresStruct: declaStruct  
-| declaradoresStruct ',' declaStruct
+listaCalificadores:   
+                    | especificTipo listaCalificadores 
+                    | calificTipo listaCalificadores 
 ;
-declaStruct: decla  
-| (decla | /*vacio*/) ':' expCte
+declaradoresStruct:   declaStruct  
+                    | declaradoresStruct ',' declaStruct
 ;
-decla: (puntero | /*vacio*/) declaradorDirecto
+declaStruct:          decla      
+                    | decla ':' expCte
 ;
-puntero: '*' (listaCalificTipos | /*vacio*/) 
-| '*' (listaCalificTipos | /*vacio*/) puntero
+decla:                
+                    | puntero declaradorDirecto
 ;
-listaCalificTipos: calificTipo 
-| listaCalificTipos calificTipo
+puntero:              
+                    | '*' listaCalificTipos 
+                    | '*' listaCalificTipos puntero
 ;
-declaradorDirecto: ID 
-| '(' decla ')' 
-| declaradorDirecto '[' (expCte | /*vacio*/) ']' 
-| declaradorDirecto '(' listaTiposParam ')' 
-| declaradorDirecto '(' (listaID | /*VACIO*/) ')'
+listaCalificTipos:    
+                    | calificTipo 
+                    | listaCalificTipos calificTipo
 ;
-listaTiposParam: listaParam 
-| listaParam ',' '.' '.' '.'
+declaradorDirecto:    ID 
+                    | '(' decla ')' 
+                    | declaradorDirecto '[' expCte ']' 
+                    | declaradorDirecto '(' listaTiposParam ')' 
+                    | declaradorDirecto '(' listaID ')'
 ;
-listaParam: declaracionParam 
-| listaParam ',' declaracionParam
+listaTiposParam:      
+                    | listaParam 
+                    | listaParam ',' '.' '.' '.'
 ;
-declaracionParam: especificDeclaracion decla 
-| especificDeclaracion (declaradorAbstracto | /*vacio*/) /*parametros anonimos*/
+listaParam:           declaracionParam 
+                    | listaParam ',' declaracionParam
 ;
-listaID: ID 
-| listaID ',' ID
+declaracionParam:     especificDeclaracion decla 
+                    | especificDeclaracion declaradorAbstracto /*parametros anonimos*/
 ;
-especificEnum: ENUM (ID | /*VACIO*/) '{' listaEnum '}' 
-| ENUM ID
+listaID:              
+                    | ID 
+                    | listaID ',' ID
 ;
-listaEnum: enumerador 
-| listaEnum ',' enumerador
+especificEnum:        ENUM identificador '{' listaEnum '}' 
+                    | ENUM ID
 ;
-enumerador: cteEnum 
-| cteEnum '=' expCte
+listaEnum:            enumerador 
+                    | listaEnum ',' enumerador
 ;
-cteEnum: ID
+enumerador:           cteEnum 
+                    | cteEnum '=' expCte
 ;
-nameTypedef: ID
+cteEnum:              ID
 ;
-nameTipo: listaCalificadores (declaradorAbstracto | /*vacio*/)
+nameTypedef:          ID
 ;
-declaradorAbstracto: puntero 
-| (puntero | /*vacio*/) declaradorAbsDirecto
+nameTipo:             listaCalificadores declaradorAbstracto
 ;
-declaradorAbsDirecto: '(' declaradorAbstracto ')' 
-| (declaradorAbsDirecto | /*vacio*/) '[' (expCte | /*vacio*/) ']' 
-| (declaradorAbsDirecto | /*vacio*/) '(' (listaTiposParam | /*vacio*/) ')'
+declaradorAbstracto:  
+                    | puntero 
+                    | puntero declaradorAbsDirecto
+;
+declaradorAbsDirecto: 
+                    | '(' declaradorAbstracto ')' 
+                    | declaradorAbsDirecto '[' expCte ']' 
+                    | declaradorAbsDirecto '(' listaTiposParam ')'
 
 
 
