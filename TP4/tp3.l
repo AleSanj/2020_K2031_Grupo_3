@@ -1,27 +1,5 @@
-%option lex-compat
-%option noyywrap
-
-SALTO_DE_LINEA \n
-PALABRAS_RESERVADAS auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while
-CARACTER_DE_PUNTUACION "("|")"|"["|"]"|"{"|"}"|","|":"|"="|";"|"..."|"#"
-CONSTANTE_DECIMAL [1-9][0-9]*
-CONSTANTE_OCTAL 0[0-7]*
-CONSTANTE_HEXADECIMAL 0[xX][0-9a-fA-F]+
-CONSTANTE_REAL [1-9][0-9]*"."[0-9]*"E"?[\+\-]?[0-9]*
-LITERAL_CADENA \"[^\"]*\"
-CARACTER_SIMPLE "'"."'"
-IDENTIFICADOR ([a-zA-Z]|_)([a-zA-Z]|[0-9]|_)*
-OPERADOR "+"|"-"|"/"|"*"|"%"|"&&"|\&|"||"|"¬"|">"|">="|"<"|"<="|"=="|"!="
-NUMERO [0-9]
-COMENTARIO_LINEA "//".*
-COMENTARIO_MULTIPLE \/\*(\*+[^\*\/]|[^\*])*\*+\/
-
 %{
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <string.h>
-    #include "tp4.tab.h"
-//    typedef struct Nodo {
+    //    typedef struct Nodo {
 //     char* Palabra;
 //     int cantidad; //la usamos guardar la cantida de identificadores y para guardar la linea en la que estan los 
 //     struct Nodo* sgte;
@@ -99,11 +77,30 @@ COMENTARIO_MULTIPLE \/\*(\*+[^\*\/]|[^\*])*\*+\/
     // NODO* listaPalReserv = NULL;
 
 %}
+%option lex-compat
+%option noyywrap
+
+
+%{
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
+    #include "tp4.tab.h"
+%}
+
+SALTO_DE_LINEA \n
+CONSTANTE_DECIMAL [1-9][0-9]*
+CONSTANTE_OCTAL 0[0-7]*
+CONSTANTE_HEXADECIMAL 0[xX][0-9a-fA-F]+
+CONSTANTE_REAL [1-9][0-9]*"."[0-9]*"E"?[\+\-]?[0-9]*
+LITERAL_CADENA \"[^\"]*\"
+CARACTER_SIMPLE "'"."'"
+IDENTIFICADOR ([a-zA-Z]|_)([a-zA-Z]|[0-9]|_)*
+COMENTARIO_LINEA "//".*
+COMENTARIO_MULTIPLE \/\*(\*+[^\*\/]|[^\*])*\*+\/
 
 %%
-%{
-//PALABRAS RESERVADAS
-%}
+
 "break"    {return BREAK;}
 "case"     {return CASE;}
 "char"     {return CHAR;}
@@ -113,7 +110,6 @@ COMENTARIO_MULTIPLE \/\*(\*+[^\*\/]|[^\*])*\*+\/
 "double"   {return DOUBLE;}
 "else"     {return ELSE;}
 "enum"     {return ENUM;}
-"goto"     {return GOTO;}
 "float"    {return FLOAT;}
 "for"      {return FOR;}
 "if"       {return IF;}
@@ -130,12 +126,8 @@ COMENTARIO_MULTIPLE \/\*(\*+[^\*\/]|[^\*])*\*+\/
 "unsigned" {return UNSIGNED;}
 "void"     {return VOID;}
 "while"    {return WHILE;}
-"static"   {return STATIC;}
-"auto"     {return AUTO;}
-"register" {return REGISTER;}
 "extern"   {return EXTERN;}
 "volatile" {return VOLATILE;}
-"continue" {return CONTINUE;}
 
 ")"        {return ')';}
 "["        {return '[';}
@@ -182,24 +174,13 @@ COMENTARIO_MULTIPLE \/\*(\*+[^\*\/]|[^\*])*\*+\/
 "+="     {return SUMAR;}
 "-="     {return RESTAR;}
 "%="     {return PORCENTAJE;}
-"|"      {return '|';}
-"^"      {return '^';}
-"<<"     {return DESPLAZIZQ;}
-">>"     {return DESPLAZDER;}
-
 
 {COMENTARIO_LINEA}
 {COMENTARIO_MULTIPLE}
 
 {SALTO_DE_LINEA} {}
-
 %%
 
-int main(){
-    
-    yyin = fopen("entrada.c" , "r");
-    yyout = fopen("salida.c" , "w");
-    yylex();
 
     // //mostrar identificadores
     // if (VerificarSiEstaVacia(listaIdentificadores)==0) {
@@ -228,7 +209,7 @@ int main(){
     // if(VerificarSiEstaVaciaConst(listaConstantesFloat)==0){
     //     mostrarctes(listaConstantesFloat,'F');
         
-    }
+
 
 //     //mostrar op y caracteres de punt
 //     if (VerificarSiEstaVacia(listaOpYCarPunt)==0) {

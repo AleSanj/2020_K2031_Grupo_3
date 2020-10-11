@@ -1,7 +1,8 @@
-//seccion de definiciones
 %{
 
 #include<stdio.h>
+extern FILE* yyin;
+char* sentencia;
 %}
 
 %union {
@@ -12,65 +13,74 @@ float nrocoma;
 }
 
 %token <nro> CTEDEC CTEOCT CTEHEX 
-%token <nrocoma> CTEREAL
-%token <cadena>  BREAK CASE CHAR CONST DEFAULT DO DOUBLE ELSE ENUM FLOAT FOR IF INT LONG RETURN CONTINUE
-%token <cadena>  VOLATILE STATIC AUTO REGISTER EXTERN SHORT SIGNED SIZEOF STRUCT SWITCH TYPEDEF UNION UNSIGNED VOID WHILE GOTO
+%token <nrocoma> CTEREAL 
+%token <cadena>  BREAK CASE CHAR CONST DEFAULT DO DOUBLE ELSE ENUM FLOAT FOR IF INT LONG RETURN
+%token <cadena>  VOLATILE EXTERN SHORT SIGNED SIZEOF STRUCT SWITCH TYPEDEF UNION UNSIGNED VOID WHILE
 %token <cadena> LITCAD ID AND OR MAYORIGUAL MENORIGUAL PORCENTAJE IGUALDAD DESIGUALDAD INCREMENTO DECREMENTO 
-%token <cadena> PUNTERO DESPLAZDER DESPLAZIZQ MULTIPLICAR DIVIDIR SUMAR RESTAR
+%token <cadena> PUNTERO MULTIPLICAR DIVIDIR SUMAR RESTAR
 %token <car> CARACTER
 
 //seccion reglas
 %% 
+input:    /*vacio*/
+        | input line
+;
+line:     '\n'
+        | sentencia
+        | sentencia '\n'
+;
 /*SENTENCIAS*/
+
 sentencia:            sentenciaExp 
                     | sentenciaCompuesta
-                    | sentenciaSeleccion
-                    | sentenciaIteracion
+                    | sentenciaSeleccion {printf("se hallo una sentencia de seleccion %s \n",sentencia);}
+                    | sentenciaIteracion {printf("se hallo una sentencia de iteracion %s \n",sentencia);}
                     | sentenciaEtiquetada
                     | sentenciaSalto
 ;
-sentenciaExp:         //vacio
+sentenciaExp:         /*vacio*/ ';'
                     | exp ';'
 ;
-sentenciaCompuesta:  '{' listaDeclaraciones listaSentencias '}'
+sentenciaCompuesta:   '{' listaSentencias '}'
+                    | '{' listaDeclaraciones listaSentencias '}'
+                    | '{' listaDeclaraciones '}'
+                    | '{' /*vacio*/ '}'
 ;
-listaDeclaraciones:   
-                    | declaracion 
+listaDeclaraciones:   declaracion 
                     | listaDeclaraciones declaracion
 ;
-listaSentencias:      
-                    | sentencia
+listaSentencias:      sentencia
                     | listaSentencias sentencia
 ;
-sentenciaSeleccion:   IF '(' exp ')' sentencia
+sentenciaSeleccion:   IF '(' exp ')' sentencia {sentencia="  if";}
                     | IF '(' exp ')' sentencia ELSE sentencia
                     | SWITCH '(' exp ')' sentencia
 ;
-sentenciaIteracion:   WHILE '(' exp ')' sentencia
+sentenciaIteracion:   WHILE '(' exp ')' sentencia {sentencia="while";}
                     | DO sentencia WHILE '(' exp ')' ';'
                     | FOR '(' exp ';' exp ';' exp ')' sentencia
 ;  
-sentenciaEtiquetada:  CASE expCte ':' sentencia
+sentenciaEtiquetada:  CASE expCondicional ':' sentencia
                     | DEFAULT ':' sentencia
                     | ID ':' sentencia
 ;
-sentenciaSalto:       CONTINUE ';'
-                    | BREAK ';'
+sentenciaSalto:     | BREAK ';'
+                    | RETURN ';'
                     | RETURN exp ';'
-                    | GOTO ID ';'
 ;
+
 /*EXPRESIONES*/
-exp:                  
-                    | expAsignacion
+
+exp:                  expAsignacion
                     | exp ',' expAsignacion
 ;
 expAsignacion:        expCondicional
-                    | expUnaria opAsignacion expAsignacion
+                    | expUnaria operadorAsignacion expAsignacion
 ;
 expCondicional:       expOLogico
                     | expOLogico '?' exp ':' expCondicional
 ;
-opAsignacion:         '='
+operadorAsignacion:  '='
                     | MULTIPLICAR
                     | DIVIDIR
                     | PORCENTAJE
@@ -80,31 +90,18 @@ opAsignacion:         '='
 expOLogico:           expYLogico
                     | expOLogico OR expYLogico
 ;
-expYLogico:           expOInclusivo
-                    | expYLogico AND expOInclusivo
-;
-expOInclusivo:        expOExcluyente
-                    | expOInclusivo '|' expOExcluyente
-;
-expOExcluyente:       expY
-                    | expOExcluyente '^' expY
-;
-expY:                 expIgualdad
-                    | expY '&' expIgualdad
+expYLogico:           expIgualdad
+                    | expYLogico AND expIgualdad
 ;
 expIgualdad:          expRelacional
                     | expIgualdad IGUALDAD expRelacional
                     | expIgualdad DESIGUALDAD expRelacional
 ;
-expRelacional:        expCorrimiento
-                    | expRelacional '<' expCorrimiento
-                    | expRelacional '>' expCorrimiento 
-                    | expRelacional MENORIGUAL expCorrimiento 
-                    | expRelacional MAYORIGUAL expCorrimiento
-;
-expCorrimiento:       expAdd 
-                    | expCorrimiento DESPLAZIZQ expAdd 
-                    | expCorrimiento DESPLAZDER expAdd
+expRelacional:        expAdd
+                    | expRelacional '<' expAdd
+                    | expRelacional '>' expAdd 
+                    | expRelacional MENORIGUAL expAdd 
+                    | expRelacional MAYORIGUAL expAdd
 ;
 expAdd:               expMultipl
                     | expAdd '+' expMultipl 
@@ -129,14 +126,14 @@ opUnario:            '&'|'*'|'+'|'-'|'!'
 ;
 expSufijo:            expPrim 
                     | expSufijo '[' exp ']' /*arreglo*/
+                    | expSufijo '(' /*vacio*/ ')'
                     | expSufijo '(' listaArgum ')' /* invocación */
                     | expSufijo '.' ID 
                     | expSufijo PUNTERO ID 
                     | expSufijo INCREMENTO 
                     | expSufijo DECREMENTO
 ;
-listaArgum:           
-                    | expAsignacion 
+listaArgum:           expAsignacion 
                     | listaArgum ',' expAsignacion
 ;
 expPrim:              ID 
@@ -144,31 +141,31 @@ expPrim:              ID
                     | CTEHEX
                     | CTEOCT
                     | CTEREAL
+                    | CARACTER
                     | LITCAD
                     | '(' exp ')'
-;
-expCte:               
-                    |expCondicional
 ;
 
 /*DECLARACIONES*/
 
-declaracion:          especificDeclaracion listaDeclaradores
+declaracion:          especificDeclaracion
+                    | especificDeclaracion listaDeclaradores
 ;
-especificDeclaracion: 
+especificDeclaracion: especificClaseAlmacenam
                     | especificClaseAlmacenam especificDeclaracion 
+                    | especificTipo 
                     | especificTipo especificDeclaracion 
+                    | calificTipo 
                     | calificTipo especificDeclaracion 
 ;
-listaDeclaradores:    
-                    | declarador 
+listaDeclaradores:    declarador 
                     | listaDeclaradores ',' declarador
 ;
 declarador:           decla 
                     | decla '=' inicializador
 ;
-inicializador:        expAsignacion /* Inicialización de tipos escalares */
-                    | '{' listaInicializadores '}' /* Inicialización de tipos estructurados */
+inicializador:        expAsignacion                 /* Inicialización de tipos escalares */
+                    | '{' listaInicializadores '}'  /* Inicialización de tipos estructurados */
                     | '{' listaInicializadores ',' '}'
 ;
 listaInicializadores: inicializador 
@@ -176,9 +173,6 @@ listaInicializadores: inicializador
 ;
 especificClaseAlmacenam:
                       TYPEDEF
-                    | STATIC 
-                    | AUTO
-                    | REGISTER 
                     | EXTERN
 ;
 especificTipo:        VOID 
@@ -190,109 +184,103 @@ especificTipo:        VOID
                     | DOUBLE 
                     | SIGNED
                     | UNSIGNED
-                    | especificStructOUnion
-                    | especificEnum
-                    | nameTypedef
+                    | especificadorStructOUnion
+                    | especificadorEnum
+                    | ID
 ;
 calificTipo:          CONST
                     | VOLATILE 
 ;
-especificStructOUnion: 
-                      structOUnion identificador '{' listaDeclarStruct '}' 
+especificadorStructOUnion: 
+                      structOUnion '{' listaDeclaracionesStruct '}'
+                    | structOUnion ID '{' listaDeclaracionesStruct '}' 
                     | structOUnion ID
-;
-identificador:        
-                    | ID {printf("holis");}
 ;
 structOUnion:         STRUCT
                     | UNION 
 ;
-listaDeclarStruct:    declaracionStruct 
-                    | listaDeclarStruct declaracionStruct
+listaDeclaracionesStruct:    
+                      declaracionStruct 
+                    | listaDeclaracionesStruct declaracionStruct
 ;
 declaracionStruct:    listaCalificadores declaradoresStruct ';'
 ;
-listaCalificadores:   
-                    | especificTipo listaCalificadores 
+listaCalificadores:   especificTipo
+                    | especificTipo listaCalificadores
+                    | calificTipo 
                     | calificTipo listaCalificadores 
 ;
 declaradoresStruct:   declaStruct  
                     | declaradoresStruct ',' declaStruct
 ;
 declaStruct:          decla      
-                    | decla ':' expCte
+                    | ':' expCondicional
+                    | decla ':' expCondicional
 ;
-decla:                
+decla:                declaradorDirecto 
                     | puntero declaradorDirecto
 ;
-puntero:              
+puntero:              '*' 
                     | '*' listaCalificTipos 
+                    | '*' puntero
                     | '*' listaCalificTipos puntero
 ;
-listaCalificTipos:    
-                    | calificTipo 
+listaCalificTipos:    calificTipo 
                     | listaCalificTipos calificTipo
 ;
 declaradorDirecto:    ID 
                     | '(' decla ')' 
-                    | declaradorDirecto '[' expCte ']' 
+                    | declaradorDirecto '[' ']'
+                    | declaradorDirecto '[' expCondicional ']' 
                     | declaradorDirecto '(' listaTiposParam ')' 
-                    | declaradorDirecto '(' listaID ')'
 ;
-listaTiposParam:      
-                    | listaParam 
+listaTiposParam:      listaParam 
                     | listaParam ',' '.' '.' '.'
 ;
 listaParam:           declaracionParam 
                     | listaParam ',' declaracionParam
 ;
 declaracionParam:     especificDeclaracion decla 
+                    | especificDeclaracion
                     | especificDeclaracion declaradorAbstracto /*parametros anonimos*/
 ;
-listaID:              
-                    | ID 
-                    | listaID ',' ID
-;
-especificEnum:        ENUM identificador '{' listaEnum '}' 
+especificadorEnum:    ENUM '{' listaEnum '}' 
+                    | ENUM ID '{' listaEnum '}' 
                     | ENUM ID
 ;
 listaEnum:            enumerador 
                     | listaEnum ',' enumerador
 ;
-enumerador:           cteEnum 
-                    | cteEnum '=' expCte
+enumerador:           ID 
+                    | ID '=' expCondicional
 ;
-cteEnum:              ID
+nameTipo:             listaCalificadores 
+                    | listaCalificadores declaradorAbstracto
 ;
-nameTypedef:          ID
-;
-nameTipo:             listaCalificadores declaradorAbstracto
-;
-declaradorAbstracto:  
-                    | puntero 
+declaradorAbstracto:  puntero 
+                    | declaradorAbsDirecto
                     | puntero declaradorAbsDirecto
 ;
-declaradorAbsDirecto: 
-                    | '(' declaradorAbstracto ')' 
-                    | declaradorAbsDirecto '[' expCte ']' 
+declaradorAbsDirecto: '(' declaradorAbstracto ')' 
+                    | '[' ']'                                      /*sin declaradorAbsDirecto ni expCondicional*/
+                    | declaradorAbsDirecto '[' ']'                 /*sin expCondicional*/
+                    | '[' expCondicional ']'                       /*sin declaradorAbsDirecto*/
+                    | declaradorAbsDirecto '[' expCondicional ']' 
+                    | '(' ')'                                      /*sin declaradorAbsDirecto ni listaTiposParam*/
+                    | '(' listaTiposParam ')'                      /*sin declaradorAbsDirecto*/
+                    | declaradorAbsDirecto '(' ')'                 /*listaTiposParam*/
                     | declaradorAbsDirecto '(' listaTiposParam ')'
-
-
-
-
-
-
 
 %%
 
-//seccion funciones de usuario
-
-
-
-
-
-
-
-
-
-
+ int main ()
+ {
+     int flag;
+     yyin=fopen("entrada.c","r");
+ 
+     flag=yyparse();
+ 
+     fclose(yyin);
+  
+     return flag;
+ }
