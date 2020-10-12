@@ -1,8 +1,33 @@
 %{
 
 #include<stdio.h>
+#include <string.h>
+
 extern FILE* yyin;
 char* sentencia;
+int yylex();
+int yyerror (char *s);
+%}
+
+%{
+ typedef struct Nodo {
+    char* Palabra;
+    char* Tipo;
+    int cantidad; 
+    struct Nodo* sgte;
+}NODO;
+
+
+NODO* CrearNodo(char*,char*);
+void RecorrerLista(NODO*); 
+int VerificarSiEstaVacia(NODO*);    
+int EstaElElemento(NODO*, char*,char*);
+void InsertarAlPpio(NODO** , char*,char*);
+void insertarSinRepetir(NODO**, char*,char*);
+void insertarIdentOrdenado(NODO**, char*,char*);
+void insertarAlFinal(NODO**,char*,char*);
+
+NODO* listaIds = NULL;
 %}
 
 %union {
@@ -19,6 +44,9 @@ float nrocoma;
 %token <cadena> LITCAD ID AND OR MAYORIGUAL MENORIGUAL PORCENTAJE IGUALDAD DESIGUALDAD INCREMENTO DECREMENTO 
 %token <cadena> PUNTERO MULTIPLICAR DIVIDIR SUMAR RESTAR
 %token <car> CARACTER
+
+
+
 
 //seccion reglas
 %% 
@@ -64,7 +92,7 @@ sentenciaEtiquetada:  CASE expCondicional ':' sentencia
                     | DEFAULT ':' sentencia
                     | ID ':' sentencia
 ;
-sentenciaSalto:     | BREAK ';'
+sentenciaSalto:     | BREAK ';' 
                     | RETURN ';'
                     | RETURN exp ';'
 ;
@@ -74,10 +102,10 @@ sentenciaSalto:     | BREAK ';'
 exp:                  expAsignacion
                     | exp ',' expAsignacion
 ;
-expAsignacion:        expCondicional
-                    | expUnaria operadorAsignacion expAsignacion
+expAsignacion:        expCondicional {$<nro>$=$<nro>1;}
+                    | expUnaria operadorAsignacion expAsignacion {printf("1hola");}
 ;
-expCondicional:       expOLogico
+expCondicional:       expOLogico {$<nro>$ = $<nro>1;}
                     | expOLogico '?' exp ':' expCondicional
 ;
 operadorAsignacion:  '='
@@ -87,13 +115,13 @@ operadorAsignacion:  '='
                     | SUMAR
                     | RESTAR
 ;
-expOLogico:           expYLogico
+expOLogico:           expYLogico {$<nro>$=$<nro>1;}
                     | expOLogico OR expYLogico
 ;
-expYLogico:           expIgualdad
+expYLogico:           expIgualdad {$<nro>$=$<nro>1;}
                     | expYLogico AND expIgualdad
 ;
-expIgualdad:          expRelacional
+expIgualdad:          expRelacional {$<nro>$=$<nro>1;}
                     | expIgualdad IGUALDAD expRelacional
                     | expIgualdad DESIGUALDAD expRelacional
 ;
@@ -103,19 +131,19 @@ expRelacional:        expAdd
                     | expRelacional MENORIGUAL expAdd 
                     | expRelacional MAYORIGUAL expAdd
 ;
-expAdd:               expMultipl
-                    | expAdd '+' expMultipl 
+expAdd:               expMultipl {$<nro>$=$<nro>1;}
+                    | expAdd '+' expMultipl {$<nro>$= $<nro>1 + $<nro>2;}
                     | expAdd '-' expMultipl
 ;
-expMultipl:           expConversion 
+expMultipl:           expConversion {$<nro>$=$<nro>1;}
                     | expMultipl '*' expConversion 
                     | expMultipl '/' expConversion 
                     | expMultipl '%' expConversion
 ;
-expConversion:        expUnaria 
+expConversion:        expUnaria {$<nro>$=$<nro>1;}
                     | '(' nameTipo ')' expConversion
 ;
-expUnaria:            expSufijo 
+expUnaria:            expSufijo {$<nro>$=$<nro>1;}
                     | INCREMENTO expUnaria 
                     | DECREMENTO expUnaria 
                     | opUnario expConversion
@@ -124,7 +152,7 @@ expUnaria:            expSufijo
 ;
 opUnario:            '&'|'*'|'+'|'-'|'!'
 ;
-expSufijo:            expPrim 
+expSufijo:            expPrim {$<nro>$=$<nro>1;}
                     | expSufijo '[' exp ']' /*arreglo*/
                     | expSufijo '(' /*vacio*/ ')'
                     | expSufijo '(' listaArgum ')' /* invocación */
@@ -137,10 +165,10 @@ listaArgum:           expAsignacion
                     | listaArgum ',' expAsignacion
 ;
 expPrim:              ID 
-                    | CTEDEC
-                    | CTEHEX
-                    | CTEOCT
-                    | CTEREAL
+                    | CTEDEC {$<nro>$=$<nro>1;}
+                    | CTEHEX {$<nro>$=$<nro>1;}
+                    | CTEOCT {$<nro>$=$<nro>1;}
+                    | CTEREAL {$<nro>$=$<nro>1;}
                     | CARACTER
                     | LITCAD
                     | '(' exp ')'
@@ -162,9 +190,9 @@ listaDeclaradores:    declarador
                     | listaDeclaradores ',' declarador
 ;
 declarador:           decla 
-                    | decla '=' inicializador
+                    | decla '=' inicializador {printf("2chau");}
 ;
-inicializador:        expAsignacion                 /* Inicialización de tipos escalares */
+inicializador:        expAsignacion                 {$<nro>$ = $<nro>1;}
                     | '{' listaInicializadores '}'  /* Inicialización de tipos estructurados */
                     | '{' listaInicializadores ',' '}'
 ;
@@ -275,12 +303,127 @@ declaradorAbsDirecto: '(' declaradorAbstracto ')'
 
  int main ()
  {
-     int flag;
-     yyin=fopen("entrada.c","r");
+        int flag;
+        yyin=fopen("entrada.c","r");
  
-     flag=yyparse();
- 
-     fclose(yyin);
-  
-     return flag;
+        flag=yyparse();
+        fclose(yyin);
+        
+        printf("\n");
+        insertarIdentOrdenado(&listaIds,"algo","entero");
+        insertarIdentOrdenado(&listaIds,"algo","char");
+        insertarIdentOrdenado(&listaIds,"algo","char");
+        insertarIdentOrdenado(&listaIds,"algo","entero");
+        insertarIdentOrdenado(&listaIds,"algo","entero");
+        insertarIdentOrdenado(&listaIds,"algo","char");
+        insertarIdentOrdenado(&listaIds,"algo","char");
+        insertarIdentOrdenado(&listaIds,"algo","entero");
+        insertarIdentOrdenado(&listaIds,"algo","char");
+        
+        RecorrerLista(listaIds);
+        
+        return flag;
  }
+
+ NODO* CrearNodo(char* palabra,char* tipo) {
+    NODO* nuevo_nodo = NULL;
+    nuevo_nodo = (NODO*) malloc(sizeof(NODO));
+    nuevo_nodo->Palabra = strdup(palabra);
+    nuevo_nodo->Tipo = strdup(tipo);
+    nuevo_nodo->cantidad = 1;
+    nuevo_nodo->sgte = NULL;    
+}
+
+
+int VerificarSiEstaVacia(NODO* l){
+    if (l == NULL){
+    return 1;
+    } else {
+        return 0;
+    }
+    }
+void InsertarAlPpio(NODO** l, char* palabra,char* tipo){
+    NODO* nuevo_nodo = NULL;
+    nuevo_nodo = CrearNodo(palabra,tipo);
+    nuevo_nodo->sgte = *l;
+    *l = nuevo_nodo;
+
+}
+void insertarSinRepetir(NODO** l,char* palabra, char* tipo) {
+        NODO* aux1 = *l;
+        if (VerificarSiEstaVacia(aux1)){
+                InsertarAlPpio(l,palabra,tipo);
+        } else if (EstaElElemento(aux1,palabra,tipo)==0) {
+                InsertarAlPpio(l,palabra,tipo);
+
+        } else {
+                while (aux1 != NULL){
+                        if (strcmp(aux1->Palabra,palabra)==0){
+                                if(strcmp(aux1->Tipo,tipo)==0){
+                                        aux1->cantidad++;
+                                        break;
+                                }
+                        }
+                        aux1=aux1->sgte;
+                }
+        }
+
+}
+void insertarIdentOrdenado(NODO** l, char* palabra,char* tipo){
+        NODO* aux1 = *l;
+        if (VerificarSiEstaVacia(aux1)){
+            InsertarAlPpio(l,palabra,tipo);
+        } else if (EstaElElemento(aux1,palabra,tipo)==0) {
+                if(strcasecmp(palabra,aux1->Palabra)<0) {
+                InsertarAlPpio(l,palabra,tipo);
+            } else {
+                    NODO* aux2 = aux1->sgte;
+                    while(aux1->sgte != NULL && (strcasecmp(palabra,aux1->sgte->Palabra)>0)) {
+                        aux1 = aux1->sgte;
+                        aux2 = aux2->sgte;
+                    }
+                    if (aux2==NULL) {
+                        NODO* nuevo_nodo = NULL;
+                        nuevo_nodo = CrearNodo(palabra,tipo);
+                        aux1->sgte=nuevo_nodo;
+                    } else {
+                    NODO* nuevo_nodo = NULL;
+                    nuevo_nodo = CrearNodo(palabra,tipo);
+                    nuevo_nodo->sgte = aux2;
+                    aux1->sgte = nuevo_nodo;
+                    }
+        }
+        } else {
+            while (aux1 != NULL){
+                        if (strcasecmp(aux1->Palabra,palabra)==0){
+                                if(strcmp(aux1->Tipo,tipo)==0){
+                                        aux1->cantidad++;
+                                        break;
+                                }
+                        }
+                        aux1=aux1->sgte;
+                }
+        }
+}
+
+int EstaElElemento(NODO*l, char* palabra,char* tipo){
+    NODO* aux = l;
+        do {
+            if((strcmp(aux->Palabra,palabra) == 0) && (strcmp(aux->Tipo,tipo)== 0)){
+                return 1;
+            } 
+            aux = aux->sgte;
+        } while (aux != NULL);
+        
+        return 0;
+}
+
+void RecorrerLista(NODO *l) {
+    NODO *aux = l;
+    printf("---- LISTA DE IDENTIFICADORES ----\n");
+    while (aux != NULL) {
+        printf("el id: %s, de tipo %s, aparece: %d veces\n",aux->Palabra,aux->Tipo,aux->cantidad);
+        aux = aux->sgte; 
+    }
+}
+
