@@ -4,6 +4,7 @@
     #include "primeros.tab.h"
     #include <string.h>
 
+    int numeroLinea = 1;
 %}
 
 LITERAL_CADENA \"[^\"]*\"
@@ -65,9 +66,12 @@ TIPO_FUNCION "void"
 "("                     {return 40;}
 ")"                     {return 41;}
 
-"{"                     {return '{';}
-"}"                     {return '}';}
-
-
+\{                      {return '{';}
+\}                      {return '}';}
+\n                      {numeroLinea++;}
+" "
+[^" "]                  {}
+.
 
 %%
+
