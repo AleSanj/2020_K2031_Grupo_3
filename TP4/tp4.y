@@ -24,7 +24,8 @@ float nrocoma;
 
 
 NODO* CrearNodo(char*,char*);
-void RecorrerLista(NODO*); 
+void RecorrerListaIdentificadores(NODO*); 
+void RecorrerListaFunciones(NODO*); 
 int VerificarSiEstaVacia(NODO*);    
 int EstaElElemento(NODO*, char*,char*);
 void InsertarAlPpio(NODO** , char*,char*);
@@ -33,7 +34,10 @@ void insertarIdentOrdenado(NODO**, char*,char*);
 void insertarAlFinal(NODO**,char*,char*);
 
 NODO* listaIdentificadores = NULL;
+NODO* listaFunciones = NULL;
 char* tipoId;
+char* tipoFun;
+int flagTipo;
 %}
 
 %token <nro> CTEDEC   
@@ -56,9 +60,11 @@ char* tipoId;
 %token <cadena> DO
 %token <cadena> FOR
 %token <cadena> WHILE
-
+%token <cadena> VOID
+%token <cadena> TIPO_DE_FUNCION
 %type <cadena> identificador
 %type <cadena> listaIds
+%type <cadena> tipoDato
 %%
 
 
@@ -67,22 +73,38 @@ input:
 ;
 line:       '\n'
             |sentencia 
-            |sentencia '\n' 
+            |sentencia '\n'
 ;
 
-declaracion:  tipoDato listaIds ';' {}
+
+declaracion:            tipoDato funcionovar
+                        |tipoFuncion funcion
 ;
-listaIds:     identificador  {}
+funcionovar:            listaIds ';'
+                        |funcion  
+;
+funcion:                ID '(' listaParametros ')' sentenciaComp {if (flagTipo){insertarIdentOrdenado(&listaFunciones,$<cadena>1,tipoFun);} else{insertarIdentOrdenado(&listaFunciones,$<cadena>1,tipoId);}}
+;
+listaParametros:        /* vacio */
+                        |parametroSuelto
+                        |parametroSuelto',' listaParametros
+;
+
+parametroSuelto:        TIPO_DE_DATO ID
+;
+listaIds:     identificador  
               |identificador ',' listaIds
 
 ;
 
-identificador:    ID      {insertarIdentOrdenado(&listaIdentificadores,$<cadena>1,tipoId)};    
+identificador:    ID      {insertarIdentOrdenado(&listaIdentificadores,$<cadena>1,tipoId);};    
                   |ID '=' expresionSelecc {insertarIdentOrdenado(&listaIdentificadores,$<cadena>1,tipoId);}
 ;
 
-tipoDato:         TIPO_DE_DATO {tipoId = $<cadena>1}
-
+tipoDato:   TIPO_DE_DATO {tipoId = $<cadena>1; flagTipo=0;}
+;                                                                       
+tipoFuncion: TIPO_DE_FUNCION {tipoFun = $<cadena>1;flagTipo=1; /*El flag nos dice si es de algun tipo escpecial de funcion (void por ejemplo) o no */}
+;
 num:        CTEDEC      
             |CTEOCT
             |CTEHEX
@@ -129,12 +151,12 @@ expMultiplicativa: 	expUnaria
 expUnaria:        	expPostfijo 
                     |INCREMENTO expUnaria 
                     |operUnario expUnaria 
-                    |SIZEOF'('TIPO_DE_DATO')'
+                    |SIZEOF'('tipoDato')'
 ;
-operUnario: 	'&' 
-              |'*' 
-              |'–' 
-              |'!'
+operUnario:     '&' 
+                |'*' 
+                |'–' 
+                |'!'
 ;
 expPostfijo:	      expPrimaria 
                     |expPostfijo '[' expresion ']' 
@@ -198,7 +220,8 @@ int main ()
   yyin=fopen("entrada.c","r");
   flag=yyparse();
           printf("\n");
-          RecorrerLista(listaIdentificadores);
+          RecorrerListaIdentificadores(listaIdentificadores);
+          RecorrerListaFunciones(listaFunciones);
   fclose(yyin);
   return flag;
 }
@@ -296,14 +319,21 @@ int EstaElElemento(NODO*l, char* palabra,char* tipo){
         return 0;
 }
 
-void RecorrerLista(NODO *l) {
+void RecorrerListaIdentificadores(NODO *l) {
     NODO *aux = l;
     printf("---- LISTA DE IDENTIFICADORES ----\n");
     while (aux != NULL) {
-        printf("el id: %s, de tipo %s, aparece: %d veces\n",aux->Palabra,aux->Tipo,aux->cantidad);
+        printf("se declaro la variable \"%s\", de tipo %s, y aparece: %d veces\n",aux->Palabra,aux->Tipo,aux->cantidad);
         aux = aux->sgte; 
     }
 }
-
+void RecorrerListaFunciones(NODO *l) {
+    NODO *aux = l;
+    printf("---- LISTA DE FUNCIONES ----\n");
+    while (aux != NULL) {
+        printf("se declaro la funcion \"%s\", de tipo %s, y aparece: %d veces\n",aux->Palabra,aux->Tipo,aux->cantidad);
+        aux = aux->sgte; 
+    }
+}
 
 
