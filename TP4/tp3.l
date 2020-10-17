@@ -17,13 +17,12 @@ NUMERO [0-9]
 
 
 
-
 %%
 "sizeof"                {return SIZEOF;}
-{CONSTANTE_DECIMAL}     {return CTEDEC;}
-{CONSTANTE_OCTAL}       {return CTEOCT;}
-{CONSTANTE_HEXADECIMAL} {return CTEHEX;}
-{CONSTANTE_REAL}        {return CTEREAL;}
+{CONSTANTE_DECIMAL}     {yylval.nro =strtol(yytext,NULL,10);return CTEDEC;}
+{CONSTANTE_OCTAL}       {yylval.nro =strtol(yytext,NULL,8);return CTEOCT;}
+{CONSTANTE_HEXADECIMAL} {yylval.nro =strtol(yytext,NULL,16);return CTEHEX;}
+{CONSTANTE_REAL}        {yylval.nro =atof(yytext);return CTEREAL;}
 "switch"                {return SWITCH;}
 "case"                  {return CASE;}
 "else"                  {return ELSE;}
@@ -34,8 +33,8 @@ NUMERO [0-9]
 "do"                    {return DO;}
 "for"                   {return FOR;}
 "while"                 {return WHILE;}
-{TIPO_DATO}             {return TIPO_DE_DATO;}
-{IDENTIFICADOR}         {return ID;}
+{TIPO_DATO}             {yylval.cadena=strdup(yytext); return TIPO_DE_DATO;}
+{IDENTIFICADOR}         {yylval.cadena=strdup(yytext); return ID;}
 
       
 "="                     {return '=';}
