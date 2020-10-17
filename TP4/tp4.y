@@ -3,8 +3,12 @@
 #include <string.h>
 #include <stdlib.h>
 extern FILE* yyin;
+extern int numeroLinea;
+
 int yylex();
-int yyerror (char *s);
+int yyerror (char *s){
+    printf("ERROR SINTACTICO EN LA LINEA: %d",numeroLinea);
+}
 
 %}
 %union {
@@ -18,20 +22,18 @@ float nrocoma;
  typedef struct Nodo {
     char* Palabra;
     char* Tipo;
-    int cantidad; 
+    int Linea; 
     struct Nodo* sgte;
 }NODO;
 
 
-NODO* CrearNodo(char*,char*);
+NODO* CrearNodo(char*,char*,int);
 void RecorrerListaIdentificadores(NODO*); 
 void RecorrerListaFunciones(NODO*); 
 int VerificarSiEstaVacia(NODO*);    
 int EstaElElemento(NODO*, char*,char*);
-void InsertarAlPpio(NODO** , char*,char*);
-void insertarSinRepetir(NODO**, char*,char*);
-void insertarIdentOrdenado(NODO**, char*,char*);
-void insertarAlFinal(NODO**,char*,char*);
+void InsertarAlPpio(NODO** , char*,char*,int);
+void insertarAlFinal(NODO**,char*,char*,int);
 
 NODO* listaIdentificadores = NULL;
 NODO* listaFunciones = NULL;
@@ -83,7 +85,7 @@ declaracion:            tipoDato funcionovar
 funcionovar:            listaIds ';'
                         |funcion  
 ;
-funcion:                ID '(' listaParametros ')' sentenciaComp {if (flagTipo){insertarIdentOrdenado(&listaFunciones,$<cadena>1,tipoFun);} else{insertarIdentOrdenado(&listaFunciones,$<cadena>1,tipoId);}}
+funcion:                ID '(' listaParametros ')' sentenciaComp {if (flagTipo){insertarAlFinal(&listaFunciones,$<cadena>1,tipoFun,numeroLinea);} else{insertarAlFinal(&listaFunciones,$<cadena>1,tipoId,numeroLinea);}}
 ;
 listaParametros:        /* vacio */
                         |parametroSuelto
@@ -97,8 +99,8 @@ listaIds:     identificador
 
 ;
 
-identificador:    ID      {insertarIdentOrdenado(&listaIdentificadores,$<cadena>1,tipoId);};    
-                  |ID '=' expresionSelecc {insertarIdentOrdenado(&listaIdentificadores,$<cadena>1,tipoId);}
+identificador:    ID      {insertarAlFinal(&listaIdentificadores,$<cadena>1,tipoId,numeroLinea);};    
+                  |ID '=' expresionSelecc {insertarAlFinal(&listaIdentificadores,$<cadena>1,tipoId,numeroLinea);}
 ;
 
 tipoDato:   TIPO_DE_DATO {tipoId = $<cadena>1; flagTipo=0;}
@@ -111,9 +113,9 @@ num:        CTEDEC
             |CTEREAL
 ;   
        
-expresion: 		expAsignacion ';' {printf("se declaro una expresion\n");} 
+expresion: 		expAsignacion ';' {} 
 ;
-expresionSelecc: expAsignacion {printf("se declaro una expresion\n");} 
+expresionSelecc: expAsignacion {} 
 ;
 expAsignacion:	expCondicional 
 			          |expUnaria operAsignacion expAsignacion 
@@ -173,24 +175,24 @@ expPrimaria:	ID
 		          |'(' expresion')'
 ;
 sentencia:      /* vacio */
-                |';' {printf("hay una sentencia vacia\n");} 
+                |';' {} 
                 |expresion
                 |declaracion
                 |sentenciaComp
-                |sentenciaSeleccion {printf("se hallo una sentencia de seleccion \n");}
-                |sentenciaIteracion {printf("se hallo una sentencia de iteracion\n");}
+                |sentenciaSeleccion {}
+                |sentenciaIteracion {}
                 |sentenciaCorte
 ;
 
-sentenciaComp:   '{' listaSentencias '}' {printf("hay una sentencia vsimple\n");}
+sentenciaComp:   '{' listaSentencias '}' {}
 ;
 listaSentencias:      sentencia
                       |listaSentencias sentencia
 ;
-sentenciaSeleccion:   IF '(' expresionSelecc ')' sentenciaComp
-                      |IF '(' expresionSelecc ')' sentenciaComp ELSE sentenciaComp
+sentenciaSeleccion:   IF '(' expresionSelecc ')' sentenciaComp {printf("se encontro una sentencia IF en la linea : %d \n", numeroLinea);}
+                      |IF '(' expresionSelecc ')' sentenciaComp ELSE sentenciaComp {printf("se encontro una sentencia IF con ELSE en la linea : %d \n", numeroLinea);}
                       |SWITCH '(' expresionSelecc ')' '{' sentenciaEtiquetada '}'
-                      |SWITCH '(' expresionSelecc ')' '{' sentenciaEtiquetada sentenciaCorte '}'
+                      |SWITCH '(' expresionSelecc ')' '{' sentenciaEtiquetada sentenciaCorte '}' {printf("se encontro una sentencia SWITCH en la linea : %d \n", numeroLinea);}
 ;
 sentenciaEtiquetada:  CASE expresionSelecc ':' sentencia
                     | DEFAULT ':' sentencia
@@ -202,10 +204,10 @@ sentenciaCorte:     BREAK ';'
                     |RETURN expresion
 
 ;
-sentenciaIteracion:   WHILE '(' expresionSelecc ')' sentenciaComp 
-                    | DO sentenciaComp WHILE '(' expresionSelecc ')' ';'
-                    | FOR '(' expresionSelecc ';' expresionSelecc ';' expresionSelecc ')' sentenciaComp
-                    | FOR '('  ';'  ';'  ')' sentenciaComp
+sentenciaIteracion:   WHILE '(' expresionSelecc ')' sentenciaComp {printf("se encontro una sentencia WHILE en la linea : %d \n", numeroLinea);}
+                    | DO sentenciaComp WHILE '(' expresionSelecc ')' ';' {printf("se encontro una sentencia DO WHILE en la linea : %d \n", numeroLinea);}
+                    | FOR '(' expresionSelecc ';' expresionSelecc ';' expresionSelecc ')' sentenciaComp {printf("se encontro una sentencia FOR en la linea : %d \n", numeroLinea);}
+                    | FOR '('  ';'  ';'  ')' sentenciaComp {printf("se encontro una sentencia FOR INFINITA en la linea : %d \n", numeroLinea);}
 ;
 
 
@@ -226,12 +228,12 @@ int main ()
   return flag;
 }
 
-NODO* CrearNodo(char* palabra,char* tipo) {
+NODO* CrearNodo(char* palabra,char* tipo,int linea) {
     NODO* nuevo_nodo = NULL;
     nuevo_nodo = (NODO*) malloc(sizeof(NODO));
     nuevo_nodo->Palabra = strdup(palabra);
     nuevo_nodo->Tipo = strdup(tipo);
-    nuevo_nodo->cantidad = 1;
+    nuevo_nodo->Linea = linea;
     nuevo_nodo->sgte = NULL;    
 }
 
@@ -243,68 +245,27 @@ int VerificarSiEstaVacia(NODO* l){
         return 0;
     }
     }
-void InsertarAlPpio(NODO** l, char* palabra,char* tipo){
+void InsertarAlPpio(NODO** l, char* palabra,char* tipo,int linea){
     NODO* nuevo_nodo = NULL;
-    nuevo_nodo = CrearNodo(palabra,tipo);
+    nuevo_nodo = CrearNodo(palabra,tipo,linea);
     nuevo_nodo->sgte = *l;
     *l = nuevo_nodo;
 
 }
-void insertarSinRepetir(NODO** l,char* palabra, char* tipo) {
-        NODO* aux1 = *l;
-        if (VerificarSiEstaVacia(aux1)){
-                InsertarAlPpio(l,palabra,tipo);
-        } else if (EstaElElemento(aux1,palabra,tipo)==0) {
-                InsertarAlPpio(l,palabra,tipo);
+void insertarAlFinal(NODO** l,char* palabra,char* tipo,int linea){
+    NODO* nuevo_nodo = NULL;
+    nuevo_nodo = CrearNodo(palabra,tipo,linea);
+    NODO* aux1 = *l;
+    if (aux1 != NULL){
 
-        } else {
-                while (aux1 != NULL){
-                        if (strcmp(aux1->Palabra,palabra)==0){
-                                if(strcmp(aux1->Tipo,tipo)==0){
-                                        aux1->cantidad++;
-                                        break;
-                                }
-                        }
-                        aux1=aux1->sgte;
-                }
-        }
-
-}
-void insertarIdentOrdenado(NODO** l, char* palabra,char* tipo){
-        NODO* aux1 = *l;
-        if (VerificarSiEstaVacia(aux1)){
-            InsertarAlPpio(l,palabra,tipo);
-        } else if (EstaElElemento(aux1,palabra,tipo)==0) {
-                if(strcasecmp(palabra,aux1->Palabra)<0) {
-                InsertarAlPpio(l,palabra,tipo);
-            } else {
-                    NODO* aux2 = aux1->sgte;
-                    while(aux1->sgte != NULL && (strcasecmp(palabra,aux1->sgte->Palabra)>0)) {
-                        aux1 = aux1->sgte;
-                        aux2 = aux2->sgte;
-                    }
-                    if (aux2==NULL) {
-                        NODO* nuevo_nodo = NULL;
-                        nuevo_nodo = CrearNodo(palabra,tipo);
-                        aux1->sgte=nuevo_nodo;
-                    } else {
-                    NODO* nuevo_nodo = NULL;
-                    nuevo_nodo = CrearNodo(palabra,tipo);
-                    nuevo_nodo->sgte = aux2;
-                    aux1->sgte = nuevo_nodo;
-                    }
-        }
-        } else {
-            while (aux1 != NULL){
-                        if (strcasecmp(aux1->Palabra,palabra)==0){
-                                if(strcmp(aux1->Tipo,tipo)==0){
-                                        aux1->cantidad++;
-                                        break;
-                                }
-                        }
-                        aux1=aux1->sgte;
-                }
-        }
+    while(aux1->sgte != NULL ){
+        aux1 = aux1->sgte;
+    }
+    nuevo_nodo -> sgte = aux1->sgte;
+    aux1 ->sgte = nuevo_nodo;
+    } else {
+        InsertarAlPpio(l,palabra,tipo,linea);
+    }
 }
 
 int EstaElElemento(NODO*l, char* palabra,char* tipo){
@@ -319,11 +280,28 @@ int EstaElElemento(NODO*l, char* palabra,char* tipo){
         return 0;
 }
 
+// ---Este recorrido evita la repetecion de identificadores cuando se usa insertarOrdenado o insertarSinRepetir, (hay que cambiar el campo linea del struct Nodo por "cantidad")
+// void RecorrerListaIdentificadores(NODO *l) {
+//     NODO *aux = l;
+//     printf("---- LISTA DE IDENTIFICADORES ----\n");
+//     while (aux != NULL) {
+//         printf("se declaro la variable \"%s\", de tipo %s, y aparece: %d veces\n",aux->Palabra,aux->Tipo,aux->cantidad);
+//         aux = aux->sgte; 
+//     }
+// }
+// void RecorrerListaFunciones(NODO *l) {
+//     NODO *aux = l;
+//     printf("---- LISTA DE FUNCIONES ----\n");
+//     while (aux != NULL) {
+//         printf("se declaro la funcion \"%s\", de tipo %s, y aparece: %d veces\n",aux->Palabra,aux->Tipo,aux->cantidad);
+//         aux = aux->sgte; 
+//     }
+// }
 void RecorrerListaIdentificadores(NODO *l) {
     NODO *aux = l;
     printf("---- LISTA DE IDENTIFICADORES ----\n");
     while (aux != NULL) {
-        printf("se declaro la variable \"%s\", de tipo %s, y aparece: %d veces\n",aux->Palabra,aux->Tipo,aux->cantidad);
+        printf("se declaro la variable \"%s\", de tipo %s, en la linea: %d \n",aux->Palabra,aux->Tipo,aux->Linea);
         aux = aux->sgte; 
     }
 }
@@ -331,9 +309,8 @@ void RecorrerListaFunciones(NODO *l) {
     NODO *aux = l;
     printf("---- LISTA DE FUNCIONES ----\n");
     while (aux != NULL) {
-        printf("se declaro la funcion \"%s\", de tipo %s, y aparece: %d veces\n",aux->Palabra,aux->Tipo,aux->cantidad);
+        printf("se declaro la funcion \"%s\", de tipo %s, en la linea: %d \n",aux->Palabra,aux->Tipo,aux->Linea);
         aux = aux->sgte; 
     }
 }
-
 
