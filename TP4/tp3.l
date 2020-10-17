@@ -14,10 +14,14 @@ CONSTANTE_HEXADECIMAL 0[xX][0-9a-fA-F]+
 CONSTANTE_REAL [1-9][0-9]*"."[0-9]*"E"?[\+\-]?[0-9]*
 IDENTIFICADOR ([a-zA-Z]|_)([a-zA-Z]|[0-9]|_)*
 NUMERO [0-9]
+TIPO_FUNCION "void"
 
 
 
 %%
+
+{TIPO_DATO}             {yylval.cadena=strdup(yytext); return TIPO_DE_DATO;}
+{TIPO_FUNCION}          {yylval.cadena=strdup(yytext); return TIPO_DE_FUNCION;}
 "sizeof"                {return SIZEOF;}
 {CONSTANTE_DECIMAL}     {yylval.nro =strtol(yytext,NULL,10);return CTEDEC;}
 {CONSTANTE_OCTAL}       {yylval.nro =strtol(yytext,NULL,8);return CTEOCT;}
@@ -33,7 +37,8 @@ NUMERO [0-9]
 "do"                    {return DO;}
 "for"                   {return FOR;}
 "while"                 {return WHILE;}
-{TIPO_DATO}             {yylval.cadena=strdup(yytext); return TIPO_DE_DATO;}
+
+
 {IDENTIFICADOR}         {yylval.cadena=strdup(yytext); return ID;}
 
       
