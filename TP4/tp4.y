@@ -1,9 +1,11 @@
 %{
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 extern FILE* yyin;
+int yylex();
+int yyerror (char *s);
 
-    int yylex();
-    int yyerror (char *s);
 %}
 %union {
 char* cadena;
@@ -11,6 +13,28 @@ char car;
 int nro;
 float nrocoma;
 }
+
+%{
+ typedef struct Nodo {
+    char* Palabra;
+    char* Tipo;
+    int cantidad; 
+    struct Nodo* sgte;
+}NODO;
+
+
+NODO* CrearNodo(char*,char*);
+void RecorrerLista(NODO*); 
+int VerificarSiEstaVacia(NODO*);    
+int EstaElElemento(NODO*, char*,char*);
+void InsertarAlPpio(NODO** , char*,char*);
+void insertarSinRepetir(NODO**, char*,char*);
+void insertarIdentOrdenado(NODO**, char*,char*);
+void insertarAlFinal(NODO**,char*,char*);
+
+NODO* listaIdentificadores = NULL;
+char* tipoId;
+%}
 
 %token <nro> CTEDEC   
 %token <nro> CTEOCT
@@ -32,6 +56,9 @@ float nrocoma;
 %token <cadena> DO
 %token <cadena> FOR
 %token <cadena> WHILE
+
+%type <cadena> identificador
+%type <cadena> listaIds
 %%
 
 
@@ -41,21 +68,22 @@ input:
 line:       '\n'
             |sentencia 
             |sentencia '\n' 
-
-
 ;
-declaracion:  TIPO_DE_DATO listaIds {printf("se declaro una variable\n");} 
+
+declaracion:  tipoDato listaIds ';' {}
 ;
-listaIds:     identificador
+listaIds:     identificador  {}
               |identificador ',' listaIds
 
 ;
 
-identificador:    ID ';'
-                  |ID '=' expresion {printf("Se le asigno una expresion correectamente \n");}
+identificador:    ID      {insertarIdentOrdenado(&listaIdentificadores,$<cadena>1,tipoId)};    
+                  |ID '=' expresionSelecc {insertarIdentOrdenado(&listaIdentificadores,$<cadena>1,tipoId);}
 ;
 
-num:        CTEDEC
+tipoDato:         TIPO_DE_DATO {tipoId = $<cadena>1}
+
+num:        CTEDEC      
             |CTEOCT
             |CTEHEX
             |CTEREAL
@@ -168,11 +196,114 @@ int main ()
 
   int flag;
   yyin=fopen("entrada.c","r");
-
-  // printf("Declare su sentencia: \n");
   flag=yyparse();
+          printf("\n");
+          RecorrerLista(listaIdentificadores);
   fclose(yyin);
   return flag;
 }
+
+NODO* CrearNodo(char* palabra,char* tipo) {
+    NODO* nuevo_nodo = NULL;
+    nuevo_nodo = (NODO*) malloc(sizeof(NODO));
+    nuevo_nodo->Palabra = strdup(palabra);
+    nuevo_nodo->Tipo = strdup(tipo);
+    nuevo_nodo->cantidad = 1;
+    nuevo_nodo->sgte = NULL;    
+}
+
+
+int VerificarSiEstaVacia(NODO* l){
+    if (l == NULL){
+    return 1;
+    } else {
+        return 0;
+    }
+    }
+void InsertarAlPpio(NODO** l, char* palabra,char* tipo){
+    NODO* nuevo_nodo = NULL;
+    nuevo_nodo = CrearNodo(palabra,tipo);
+    nuevo_nodo->sgte = *l;
+    *l = nuevo_nodo;
+
+}
+void insertarSinRepetir(NODO** l,char* palabra, char* tipo) {
+        NODO* aux1 = *l;
+        if (VerificarSiEstaVacia(aux1)){
+                InsertarAlPpio(l,palabra,tipo);
+        } else if (EstaElElemento(aux1,palabra,tipo)==0) {
+                InsertarAlPpio(l,palabra,tipo);
+
+        } else {
+                while (aux1 != NULL){
+                        if (strcmp(aux1->Palabra,palabra)==0){
+                                if(strcmp(aux1->Tipo,tipo)==0){
+                                        aux1->cantidad++;
+                                        break;
+                                }
+                        }
+                        aux1=aux1->sgte;
+                }
+        }
+
+}
+void insertarIdentOrdenado(NODO** l, char* palabra,char* tipo){
+        NODO* aux1 = *l;
+        if (VerificarSiEstaVacia(aux1)){
+            InsertarAlPpio(l,palabra,tipo);
+        } else if (EstaElElemento(aux1,palabra,tipo)==0) {
+                if(strcasecmp(palabra,aux1->Palabra)<0) {
+                InsertarAlPpio(l,palabra,tipo);
+            } else {
+                    NODO* aux2 = aux1->sgte;
+                    while(aux1->sgte != NULL && (strcasecmp(palabra,aux1->sgte->Palabra)>0)) {
+                        aux1 = aux1->sgte;
+                        aux2 = aux2->sgte;
+                    }
+                    if (aux2==NULL) {
+                        NODO* nuevo_nodo = NULL;
+                        nuevo_nodo = CrearNodo(palabra,tipo);
+                        aux1->sgte=nuevo_nodo;
+                    } else {
+                    NODO* nuevo_nodo = NULL;
+                    nuevo_nodo = CrearNodo(palabra,tipo);
+                    nuevo_nodo->sgte = aux2;
+                    aux1->sgte = nuevo_nodo;
+                    }
+        }
+        } else {
+            while (aux1 != NULL){
+                        if (strcasecmp(aux1->Palabra,palabra)==0){
+                                if(strcmp(aux1->Tipo,tipo)==0){
+                                        aux1->cantidad++;
+                                        break;
+                                }
+                        }
+                        aux1=aux1->sgte;
+                }
+        }
+}
+
+int EstaElElemento(NODO*l, char* palabra,char* tipo){
+    NODO* aux = l;
+        do {
+            if((strcmp(aux->Palabra,palabra) == 0) && (strcmp(aux->Tipo,tipo)== 0)){
+                return 1;
+            } 
+            aux = aux->sgte;
+        } while (aux != NULL);
+        
+        return 0;
+}
+
+void RecorrerLista(NODO *l) {
+    NODO *aux = l;
+    printf("---- LISTA DE IDENTIFICADORES ----\n");
+    while (aux != NULL) {
+        printf("el id: %s, de tipo %s, aparece: %d veces\n",aux->Palabra,aux->Tipo,aux->cantidad);
+        aux = aux->sgte; 
+    }
+}
+
 
 
