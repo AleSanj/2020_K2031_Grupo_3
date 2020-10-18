@@ -3,19 +3,19 @@
 #include <string.h>
 #include <stdlib.h>
 extern FILE* yyin;
-extern int numeroLinea;
+extern int yylineno;
 
 int yylex();
-int yyerror (char *s){
-    printf("ERROR SINTACTICO EN LA LINEA: %d",numeroLinea);
+void yyerror (char *s){
+    printf("ERROR SINTACTICO EN LA LINEA: %d",yylineno);
 }
 
 %}
 %union {
-char* cadena;
-char car;
-int nro;
-float nrocoma;
+    char* cadena;
+    char car;
+    int nro;
+    float nrocoma;
 }
 
 %{
@@ -28,14 +28,14 @@ float nrocoma;
 
 
 NODO* CrearNodo(char*,char*,int);
-void RecorrerListaIdentificadores(NODO*); 
+void RecorrerListaVariables(NODO*); 
 void RecorrerListaFunciones(NODO*); 
 int VerificarSiEstaVacia(NODO*);    
 int EstaElElemento(NODO*, char*,char*);
 void InsertarAlPpio(NODO** , char*,char*,int);
 void insertarAlFinal(NODO**,char*,char*,int);
 
-NODO* listaIdentificadores = NULL;
+NODO* listaVars = NULL;
 NODO* listaFunciones = NULL;
 char* tipoId;
 char* tipoFun;
@@ -64,28 +64,56 @@ int flagTipo;
 %token <cadena> WHILE
 %token <cadena> VOID
 %token <cadena> TIPO_DE_FUNCION
+%token STRUCT UNION
+%token TYPEDEF
+
 %type <cadena> identificador
 %type <cadena> listaIds
 %type <cadena> tipoDato
+%type <cadena> sentenciaSeleccion
+
 %%
 
 
 input:      
-            |input line
+                        |input line
 ;
-line:       '\n'
-            |sentencia 
-            |sentencia '\n'
+line:                   '\n'
+                        |sentencia 
+                        |sentencia '\n'
+            
 ;
 
 
-declaracion:            tipoDato funcionovar
+declaracion:             tipoDato funcionovar
                         |tipoFuncion funcion
+                        |TYPEDEF structOUnion 
+                        |structOUnion
 ;
-funcionovar:            listaIds ';'
+
+structOUnion:            STRUCT ID'{' tipoDato listaIds ';' masDeclaraciones '}' idONo ';'
+                        |UNION ID '{' tipoDato listaIds  ';' masDeclaraciones '}' idONo ';' 
+;                        
+idONo:                  /*VACIO*/ 
+                        |ID
+;
+masDeclaraciones:       /* vacio */ 
+                        |tipoDato listaIds ';' masDeclaraciones
+                        | tipoDato ID ';' masDeclaraciones
+
+;
+funcionovar:             listaIds ';'
                         |funcion  
 ;
-funcion:                ID '(' listaParametros ')' sentenciaComp {if (flagTipo){insertarAlFinal(&listaFunciones,$<cadena>1,tipoFun,numeroLinea);} else{insertarAlFinal(&listaFunciones,$<cadena>1,tipoId,numeroLinea);}}
+funcion:                ID '(' listaParametros ')' sentenciaComp {if (flagTipo){insertarAlFinal(&listaFunciones,$<cadena>1,tipoFun,yylineno);} else{insertarAlFinal(&listaFunciones,$<cadena>1,tipoId,yylineno);}}
+                        |prototipo 
+
+;
+prototipo:              ID '(' listaParametros ')' ';' {if (flagTipo){insertarAlFinal(&listaFunciones,$<cadena>1,tipoFun,yylineno);} else{insertarAlFinal(&listaFunciones,$<cadena>1,tipoId,yylineno);}}
+                       |ID '(' listaSoloTipos ')' ';' {if (flagTipo){insertarAlFinal(&listaFunciones,$<cadena>1,tipoFun,yylineno);} else{insertarAlFinal(&listaFunciones,$<cadena>1,tipoId,yylineno);}}
+;
+listaSoloTipos:         tipoDato ',' listaSoloTipos
+                       | tipoDato
 ;
 listaParametros:        /* vacio */
                         |parametroSuelto
@@ -94,30 +122,32 @@ listaParametros:        /* vacio */
 
 parametroSuelto:        TIPO_DE_DATO ID
 ;
-listaIds:     identificador  
-              |identificador ',' listaIds
+listaIds:                identificador  
+                        |identificador ',' listaIds
 
 ;
 
-identificador:    ID      {insertarAlFinal(&listaIdentificadores,$<cadena>1,tipoId,numeroLinea);};    
-                  |ID '=' expresionSelecc {insertarAlFinal(&listaIdentificadores,$<cadena>1,tipoId,numeroLinea);}
+identificador:           ID      {insertarAlFinal(&listaVars,$<cadena>1,tipoId,yylineno);};    
+                        |ID '=' expresionSelecc {insertarAlFinal(&listaVars,$<cadena>1,tipoId,yylineno);}
 ;
 
-tipoDato:   TIPO_DE_DATO {tipoId = $<cadena>1; flagTipo=0;}
+tipoDato:                TIPO_DE_DATO {tipoId = $<cadena>1; flagTipo=0;}
+                        |TIPO_DE_DATO '*' {tipoId = strcat($<cadena>1,"*"); flagTipo=0;}
 ;                                                                       
-tipoFuncion: TIPO_DE_FUNCION {tipoFun = $<cadena>1;flagTipo=1; /*El flag nos dice si es de algun tipo escpecial de funcion (void por ejemplo) o no */}
+tipoFuncion:             TIPO_DE_FUNCION {tipoFun = $<cadena>1;flagTipo=1; /*El flag nos dice si es de algun tipo escpecial de funcion (void por ejemplo) o no */}
 ;
-num:        CTEDEC      
+num:         CTEDEC      
             |CTEOCT
             |CTEHEX
             |CTEREAL
+            |CARACTER
 ;   
        
 expresion: 		expAsignacion ';' {} 
 ;
 expresionSelecc: expAsignacion {} 
 ;
-expAsignacion:	expCondicional 
+expAsignacion:	       expCondicional 
 			          |expUnaria operAsignacion expAsignacion 
 ;
 operAsignacion: '='
@@ -125,24 +155,24 @@ operAsignacion: '='
 ;
 expCondicional: expOr 
 ;
-expOr:          expAnd 
+expOr:               expAnd 
  		            |expOr OR expAnd
 ;
 expAnd:         expIgualdad 
                 |expAnd AND expIgualdad
 ;
-expIgualdad:  	expRelacional 
+expIgualdad:  	       expRelacional 
 		 	          |expIgualdad IGUALDAD expRelacional
 		    	      |expIgualdad DISTINTO expRelacional
 ;                
-expRelacional:	expAditiva 
+expRelacional:	     expAditiva 
 		       	    |expRelacional MAYORIGUAL expAditiva
 		       	    |expRelacional '>' expAditiva
 		       	    |expRelacional MENORIGUAL expAditiva
 		       	    |expRelacional '<' expAditiva
 
 ;
-expAditiva:    	expMultiplicativa 
+expAditiva:    	 expMultiplicativa 
                 |expAditiva '+' expMultiplicativa
                 |expAditiva '-' expMultiplicativa
 ;
@@ -165,49 +195,52 @@ expPostfijo:	      expPrimaria
                     |expPostfijo '(' listaArgumentos ')' 
                     |expPostfijo '(' ')' 
 ;
-listaArgumentos:	  expAsignacion 
+listaArgumentos:    	 expAsignacion 
 	           		    |listaArgumentos ',' expAsignacion
 ;
                     
-expPrimaria:	ID
+expPrimaria:	   ID
 		          |num 
 		          |LITCAD 
 		          |'(' expresion')'
 ;
 sentencia:      /* vacio */
-                |';' {} 
+                |';' 
                 |expresion
                 |declaracion
                 |sentenciaComp
-                |sentenciaSeleccion {}
-                |sentenciaIteracion {}
+                |sentenciaSeleccion 
+                |sentenciaIteracion 
                 |sentenciaCorte
+                
+                
 ;
 
-sentenciaComp:   '{' listaSentencias '}' {}
+sentenciaComp:   '{' listaSentencias '}' 
 ;
 listaSentencias:      sentencia
                       |listaSentencias sentencia
 ;
-sentenciaSeleccion:   IF '(' expresionSelecc ')' sentenciaComp {printf("se encontro una sentencia IF en la linea : %d \n", numeroLinea);}
-                      |IF '(' expresionSelecc ')' sentenciaComp ELSE sentenciaComp {printf("se encontro una sentencia IF con ELSE en la linea : %d \n", numeroLinea);}
-                      |SWITCH '(' expresionSelecc ')' '{' sentenciaEtiquetada '}'
-                      |SWITCH '(' expresionSelecc ')' '{' sentenciaEtiquetada sentenciaCorte '}' {printf("se encontro una sentencia SWITCH en la linea : %d \n", numeroLinea);}
+sentenciaSeleccion:    IF '(' expresionSelecc ')' sentenciaComp {printf("se encontro una sentencia IF en la linea : %d \n",yylineno);}
+                      |IF '(' expresionSelecc ')' sentenciaComp ELSE sentenciaComp {printf("se encontro una sentencia IF con ELSE en la linea : %d \n", yylineno);}
+                      |SWITCH '(' expresionSelecc ')' '{' sentenciaEtiquetada '}'  {printf("se encontro una sentencia SWITCH en la linea : %d \n", yylineno);}
+                      |SWITCH '(' expresionSelecc ')' '{' sentenciaEtiquetada sentenciaCorte '}' {printf("se encontro una sentencia SWITCH en la linea : %d \n", yylineno);}
 ;
-sentenciaEtiquetada:  CASE expresionSelecc ':' sentencia
+sentenciaEtiquetada:  CASE expresionSelecc ':' sentencia 
+                    | CASE expresionSelecc ':' sentencia sentenciaEtiquetada
                     | DEFAULT ':' sentencia
                     | ID ':' sentencia
 ;
 
-sentenciaCorte:     BREAK ';'
+sentenciaCorte:      BREAK ';'
                     |RETURN ';'
                     |RETURN expresion
 
 ;
-sentenciaIteracion:   WHILE '(' expresionSelecc ')' sentenciaComp {printf("se encontro una sentencia WHILE en la linea : %d \n", numeroLinea);}
-                    | DO sentenciaComp WHILE '(' expresionSelecc ')' ';' {printf("se encontro una sentencia DO WHILE en la linea : %d \n", numeroLinea);}
-                    | FOR '(' expresionSelecc ';' expresionSelecc ';' expresionSelecc ')' sentenciaComp {printf("se encontro una sentencia FOR en la linea : %d \n", numeroLinea);}
-                    | FOR '('  ';'  ';'  ')' sentenciaComp {printf("se encontro una sentencia FOR INFINITA en la linea : %d \n", numeroLinea);}
+sentenciaIteracion:   WHILE '(' expresionSelecc ')' sentenciaComp {printf("se encontro una sentencia WHILE en la linea : %d \n", yylineno);}
+                    | DO sentenciaComp WHILE '(' expresionSelecc ')' ';' {printf("se encontro una sentencia DO WHILE en la linea : %d \n", yylineno);}
+                    | FOR '(' expresionSelecc ';' expresionSelecc ';' expresionSelecc ')' sentenciaComp {printf("se encontro una sentencia FOR en la linea : %d \n", yylineno);}
+                    | FOR '('  ';'  ';'  ')' sentenciaComp {printf("se encontro una sentencia FOR INFINITA en la linea : %d \n", yylineno);}
 ;
 
 
@@ -222,7 +255,7 @@ int main ()
   yyin=fopen("entrada.c","r");
   flag=yyparse();
           printf("\n");
-          RecorrerListaIdentificadores(listaIdentificadores);
+          RecorrerListaVariables(listaVars);
           RecorrerListaFunciones(listaFunciones);
   fclose(yyin);
   return flag;
@@ -280,26 +313,9 @@ int EstaElElemento(NODO*l, char* palabra,char* tipo){
         return 0;
 }
 
-// ---Este recorrido evita la repetecion de identificadores cuando se usa insertarOrdenado o insertarSinRepetir, (hay que cambiar el campo linea del struct Nodo por "cantidad")
-// void RecorrerListaIdentificadores(NODO *l) {
-//     NODO *aux = l;
-//     printf("---- LISTA DE IDENTIFICADORES ----\n");
-//     while (aux != NULL) {
-//         printf("se declaro la variable \"%s\", de tipo %s, y aparece: %d veces\n",aux->Palabra,aux->Tipo,aux->cantidad);
-//         aux = aux->sgte; 
-//     }
-// }
-// void RecorrerListaFunciones(NODO *l) {
-//     NODO *aux = l;
-//     printf("---- LISTA DE FUNCIONES ----\n");
-//     while (aux != NULL) {
-//         printf("se declaro la funcion \"%s\", de tipo %s, y aparece: %d veces\n",aux->Palabra,aux->Tipo,aux->cantidad);
-//         aux = aux->sgte; 
-//     }
-// }
-void RecorrerListaIdentificadores(NODO *l) {
+void RecorrerListaVariables(NODO *l) {
     NODO *aux = l;
-    printf("---- LISTA DE IDENTIFICADORES ----\n");
+    printf("---- LISTA DE VARIABLES ----\n");
     while (aux != NULL) {
         printf("se declaro la variable \"%s\", de tipo %s, en la linea: %d \n",aux->Palabra,aux->Tipo,aux->Linea);
         aux = aux->sgte; 
