@@ -94,12 +94,12 @@ declaracion:             tipoDato funcionovar
 structOUnion:            STRUCT ID'{' tipoDato listaIds ';' masDeclaraciones '}' idONo ';'
                         |UNION ID '{' tipoDato listaIds  ';' masDeclaraciones '}' idONo ';' 
 ;                        
-idONo:                  /*VACIO*/ 
+idONo:                  /*vacio*/
                         |ID
 ;
 masDeclaraciones:       /* vacio */ 
                         |tipoDato listaIds ';' masDeclaraciones
-                        | tipoDato ID ';' masDeclaraciones
+                        | tipoDato ID ';' masDeclaraciones 
 
 ;
 funcionovar:             listaIds ';'
@@ -127,7 +127,7 @@ listaIds:                identificador
 
 ;
 
-identificador:           ID      {insertarAlFinal(&listaVars,$<cadena>1,tipoId,yylineno);};    
+identificador:           ID      {insertarAlFinal(&listaVars,$<cadena>1,tipoId,yylineno);}    
                         |ID '=' expresionSelecc {insertarAlFinal(&listaVars,$<cadena>1,tipoId,yylineno);}
 ;
 
@@ -221,18 +221,22 @@ sentenciaComp:   '{' listaSentencias '}'
 listaSentencias:      sentencia
                       |listaSentencias sentencia
 ;
-sentenciaSeleccion:    IF '(' expresionSelecc ')' sentenciaComp {printf("se encontro una sentencia IF en la linea : %d \n",yylineno);}
-                      |IF '(' expresionSelecc ')' sentenciaComp ELSE sentenciaComp {printf("se encontro una sentencia IF con ELSE en la linea : %d \n", yylineno);}
-                      |SWITCH '(' expresionSelecc ')' '{' sentenciaEtiquetada '}'  {printf("se encontro una sentencia SWITCH en la linea : %d \n", yylineno);}
-                      |SWITCH '(' expresionSelecc ')' '{' sentenciaEtiquetada sentenciaCorte '}' {printf("se encontro una sentencia SWITCH en la linea : %d \n", yylineno);}
-;
-sentenciaEtiquetada:  CASE expresionSelecc ':' sentencia 
-                    | CASE expresionSelecc ':' sentencia sentenciaEtiquetada
-                    | DEFAULT ':' sentencia
-                    | ID ':' sentencia
+sentenciaSeleccion:    IF '(' expresionSelecc ')' sentenciaComp sentenciaElse {printf("se encontro una sentencia IF en la linea : %d \n",yylineno);}
+                       |SWITCH '(' expresionSelecc ')' sentenciaDelSwitch {printf("se encontro una sentencia SWITCH en la linea : %d \n", yylineno);}
 ;
 
-sentenciaCorte:      BREAK ';'
+sentenciaDelSwitch:     '{' sentenciaEtiquetada '}'
+;
+sentenciaElse:         /*vacio*/
+                       |ELSE sentenciaComp 
+
+;
+sentenciaEtiquetada:    CASE expresionSelecc ':' sentencia sentenciaEtiquetada sentenciaCorte
+                        |ID expresionSelecc ':' sentencia sentenciaEtiquetada sentenciaCorte
+                        |DEFAULT ':' sentencia sentenciaCorte
+;                        
+sentenciaCorte:     /*vacio*/
+                    |BREAK ';'
                     |RETURN ';'
                     |RETURN expresion
 
