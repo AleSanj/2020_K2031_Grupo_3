@@ -87,21 +87,27 @@ line:                   '\n'
 
 declaracion:             tipoDato funcionovar
                         |tipoFuncion funcion
-                        |TYPEDEF structOUnion 
-                        |structOUnion
+                        |TYPEDEF struct 
+                        |struct
 ;
 
-structOUnion:            STRUCT ID'{' tipoDato listaIds ';' masDeclaraciones '}' idONo ';'
-                        |UNION ID '{' tipoDato listaIds  ';' masDeclaraciones '}' idONo ';' 
-;                        
+struct:            structOunion ID'{' TIPO_DE_DATO muchosIds ';' masDeclaraciones '}' idONo ';' { printf( "se declaro un strcut en la linea: %d\n",yylineno);}
+;     
+
+muchosIds:          ID
+                    |ID ',' muchosIds
+;
+
+masDeclaraciones:   /*vacio*/
+                    |TIPO_DE_DATO muchosIds ';' masDeclaraciones
+;
+structOunion:       STRUCT
+                    |UNION
+
 idONo:                  /*vacio*/
                         |ID
 ;
-masDeclaraciones:       /* vacio */ 
-                        |tipoDato listaIds ';' masDeclaraciones
-                        | tipoDato ID ';' masDeclaraciones 
 
-;
 funcionovar:             listaIds ';'
                         |funcion  
 ;
@@ -221,8 +227,8 @@ sentenciaComp:   '{' listaSentencias '}'
 listaSentencias:      sentencia
                       |listaSentencias sentencia
 ;
-sentenciaSeleccion:    IF '(' expresionSelecc ')' sentenciaComp sentenciaElse {printf("se encontro una sentencia IF en la linea : %d \n",yylineno);}
-                       |SWITCH '(' expresionSelecc ')' sentenciaDelSwitch {printf("se encontro una sentencia SWITCH en la linea : %d \n", yylineno);}
+sentenciaSeleccion:    IF {printf("se encontro una sentencia IF en la linea : %d \n",yylineno);} '(' expresionSelecc ')' sentenciaComp sentenciaElse 
+                       |SWITCH {printf("se encontro una sentencia SWITCH en la linea : %d \n", yylineno);} '(' expresionSelecc ')' sentenciaDelSwitch 
 ;
 
 sentenciaDelSwitch:     '{' sentenciaEtiquetada '}'
@@ -241,12 +247,12 @@ sentenciaCorte:     /*vacio*/
                     |RETURN expresion
 
 ;
-sentenciaIteracion:   WHILE '(' expresionSelecc ')' sentenciaComp {printf("se encontro una sentencia WHILE en la linea : %d \n", yylineno);}
-                    | DO sentenciaComp WHILE '(' expresionSelecc ')' ';' {printf("se encontro una sentencia DO WHILE en la linea : %d \n", yylineno);}
-                    | FOR '(' expresionSelecc ';' expresionSelecc ';' expresionSelecc ')' sentenciaComp {printf("se encontro una sentencia FOR en la linea : %d \n", yylineno);}
-                    | FOR '('  ';'  ';'  ')' sentenciaComp {printf("se encontro una sentencia FOR INFINITA en la linea : %d \n", yylineno);}
+sentenciaIteracion:   WHILE {printf("se encontro una sentencia WHILE en la linea : %d \n", yylineno);} '(' expresionSelecc ')' sentenciaComp 
+                    | DO  {printf("se encontro una sentencia DO WHILE en la linea : %d \n", yylineno);} sentenciaComp WHILE '(' expresionSelecc ')' ';' 
+                    | FOR {printf("se encontro una sentencia FOR en la linea : %d \n", yylineno);} sentenciaFor 
 ;
-
+sentenciaFor:       '(' expresionSelecc ';' expresionSelecc ';' expresionSelecc ')' sentenciaComp
+                    |'('  ';'  ';'  ')' sentenciaComp
 
 
 
