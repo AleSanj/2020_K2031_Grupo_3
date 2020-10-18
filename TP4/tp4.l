@@ -1,13 +1,17 @@
 %option lex-compat
 %option noyywrap
+%option yylineno
+
 %{
-    #include "primeros.tab.h"
+    #include "tp4.tab.h"
     #include <string.h>
 
     int numeroLinea = 1;
 %}
-
+COMENTARIO_LINEA "//".*
+COMENTARIO_MULTIPLE \/\*(\*+[^\*\/]|[^\*])*\*+\/
 LITERAL_CADENA \"[^\"]*\"
+CARACTER_SIMPLE "'"."'"
 TIPO_DATO "int"|"float"|"double"|"const"|"char"|"long"
 CONSTANTE_DECIMAL [1-9][0-9]*
 CONSTANTE_OCTAL 0[0-7]*
@@ -21,6 +25,10 @@ TIPO_FUNCION "void"
 
 %%
 
+{COMENTARIO_LINEA}       {}
+{COMENTARIO_MULTIPLE}   {}
+{CARACTER_SIMPLE}       {return CARACTER;}
+{LITERAL_CADENA}        {return LITCAD;}
 {TIPO_DATO}             {yylval.cadena=strdup(yytext); return TIPO_DE_DATO;}
 {TIPO_FUNCION}          {yylval.cadena=strdup(yytext); return TIPO_DE_FUNCION;}
 "sizeof"                {return SIZEOF;}
@@ -38,7 +46,9 @@ TIPO_FUNCION "void"
 "do"                    {return DO;}
 "for"                   {return FOR;}
 "while"                 {return WHILE;}
-
+"struct"                {return STRUCT;}
+"union"                 {return UNION;}
+"typedef"               {return TYPEDEF;}
 
 {IDENTIFICADOR}         {yylval.cadena=strdup(yytext); return ID;}
 
@@ -47,7 +57,7 @@ TIPO_FUNCION "void"
 ";"                     {return ';';}
 "'"                     {return 39;}    
 ","                     {return ',';}
-
+":"                     {return ':';}
 "+"                     {return '+';}
 "-"                     {return '-';}
 "/"                     {return '/';}
@@ -68,10 +78,12 @@ TIPO_FUNCION "void"
 
 \{                      {return '{';}
 \}                      {return '}';}
-\n                      {numeroLinea++;}
-" "
-[^" "]                  {}
-.
+\n
+" "                     {}
+\t                      {}
+.                       {printf("ERROR LEXICO: %s, EN LINEA: %d \n",yytext,yylineno);}
 
 %%
+
+
 
