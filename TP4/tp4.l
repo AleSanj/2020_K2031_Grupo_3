@@ -82,7 +82,6 @@ TIPO_FUNCION "void"
 " "                     {}
 \t                      {}
 .                       {printf("ERROR LEXICO: %s, EN LINEA: %d \n",yytext,yylineno);}
-
 %%
 
 
