@@ -45,7 +45,7 @@ TIPO_FUNCION "void"
 "if"                    {return IF;}
 "do"                    {return DO;}
 "for"                   {return FOR;}
-"while"                 {return WHILE;}
+"while"                 {yylval.cadena = yytext;return WHILE;}
 "struct"                {return STRUCT;}
 "union"                 {return UNION;}
 "typedef"               {return TYPEDEF;}
@@ -82,7 +82,5 @@ TIPO_FUNCION "void"
 " "                     {}
 \t                      {}
 .                       {printf("ERROR LEXICO: %s, EN LINEA: %d \n",yytext,yylineno);}
+
 %%
-
-
-
