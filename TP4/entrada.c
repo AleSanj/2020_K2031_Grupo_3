@@ -18,15 +18,18 @@ int profesantielmejor(char*,int);
  char* a = "asdasd";
  int a,b=sizeof(int),c,d,e,f,g,h,i,j,k,l,m,n;
 }
+suma(1,2,3);
 struct alo{
-int santi;
-char sabri;
-int ale;
-int mati;
-float juli;
-int iniaki;
+    int santi;
+    char sabri;
+    int ale;
+    int mati;
+    float juli;
+    int iniaki;
 }aprobados;
-
+do {
+$$2;
+} while (13);
 switch (2)
 {
     case 1: 
