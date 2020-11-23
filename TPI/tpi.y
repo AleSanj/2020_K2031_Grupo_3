@@ -52,13 +52,17 @@ void RecorrerListaParametros(NODO*);
 int CantidadDeNodos(NODO*);
 int EstaLaFun(LISTADELISTAS*, char*);
 char* tipoDeDatoLaEstructura(char* ,NODO*, char*,LISTADELISTAS*);
+int cantidadParametros(LISTADELISTAS*, char*);
 
 NODO* listaVars = NULL;
 LISTADELISTAS* listaFunciones = NULL;
 NODO* listaParametros2 = NULL;
 char* tipoId;
 char* tipoFun;
+
 int flagTipo;
+int contadorParametros;
+char* buscarFuncion;
 %}
 
 %token <nro> CTEDEC   
@@ -85,6 +89,7 @@ int flagTipo;
 %token <cadena> TIPO_DE_FUNCION
 %token STRUCT UNION
 %token TYPEDEF
+
 
 %type <cadena> identificador
 %type <cadena> listaIds
@@ -214,8 +219,8 @@ expAditiva:    	 expMultiplicativa
                 |expAditiva '+' expMultiplicativa
                 |expAditiva '-' expMultiplicativa
 ;
-expMultiplicativa: 	 expUnaria                                   {$<cadena>$ = $<cadena>1;}
-                    |expMultiplicativa '*' expUnaria             {if(strcmp(tipoDeDatoLaEstructura($<cadena>1,listaVars, NULL,NULL),tipoDeDatoLaEstructura($<cadena>3,listaVars,NULL,NULL))==0){}else {printf("ERROR SEMANTICO: LOS TIPOS SON INCOMPATIBLES\n");}}
+expMultiplicativa: 	 expUnaria                                   {printf("wa:%s \n",$<cadena>1);}
+                    |expMultiplicativa '*' expUnaria             {printf("1:%s y 3:%s \n",$<cadena>1,$<cadena>3);if(strcmp(tipoDeDatoLaEstructura($<cadena>1,listaVars, NULL,NULL),tipoDeDatoLaEstructura($<cadena>3,listaVars,NULL,NULL))==0){}else {printf("ERROR SEMANTICO: LOS TIPOS SON INCOMPATIBLES en la linea %d\n", yylineno);}}
                     |expMultiplicativa '/' expUnaria               
 ;
 expUnaria:        	expPostfijo                                  {$<cadena>$ = $<cadena>1;}
@@ -230,11 +235,13 @@ operUnario:     '&'
 ;
 expPostfijo:	     expPrimaria                {$<cadena>$ = $<cadena>1;}
                     |ID '[' expresionSelecc ']' 
-                    |ID '(' listaArgumentos ')' {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}}
-                    |ID '(' ')'                 {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}}
+                    |ID {buscarFuncion= $<cadena>1;} '(' listaArgumentos ')' validacionCantidadParametros {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}contadorParametros=0;}
+                    |ID {buscarFuncion= $<cadena>1;} '(' ')' validacionCantidadParametros                 {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}contadorParametros=0;}
 ;
-listaArgumentos:    	 expAsignacion 
-	           		    |listaArgumentos ',' expAsignacion
+listaArgumentos:    	 expPrimaria                     {contadorParametros++;}
+	           		    |listaArgumentos ',' expPrimaria {contadorParametros++;}
+;
+validacionCantidadParametros:         /*vacio*/       {if(contadorParametros != cantidadParametros(listaFunciones,buscarFuncion) ){ printf("ERROR SEMANTICO: PROBLEMA CON LA CANTIDAD DE PARAMETROS\n");} } 
 ;
                     
 expPrimaria:	   ID                       {if(EstaLaVar(listaVars,$<cadena>1)==0){printf("ERROR, La variable %s NO esta declarada\n",$<cadena>1); $<cadena>$ = $<cadena>1;}}
@@ -332,6 +339,7 @@ void insertarAlFinalLL(LISTADELISTAS** ldel,NODO* lista ,char* tipoFuncion, char
 
 }
 
+
 void recorrerLL(LISTADELISTAS*l) {
         LISTADELISTAS*aux1 = l;
         printf("\n----LISTA DE FUNCIONES---- \n");
@@ -344,6 +352,7 @@ void recorrerLL(LISTADELISTAS*l) {
     }
 }
 
+
 void RecorrerListaParametros(NODO *l) {
     NODO *aux = l;
     printf("Cantidad de parametros: %d\n",CantidadDeNodos(aux));
@@ -351,6 +360,15 @@ void RecorrerListaParametros(NODO *l) {
     while (aux != NULL) {
         printf("%s\n",aux->Tipo);
         aux = aux->sgte; 
+    }
+}
+int cantidadParametros (LISTADELISTAS*l, char* funcion){
+    LISTADELISTAS* aux = l;
+    while(aux != NULL){
+        if(strcmp(funcion,aux->NombreFuncion)==0){
+            return (CantidadDeNodos(aux->Parametros));
+        }
+        aux= aux->sgte;
     }
 }
 
