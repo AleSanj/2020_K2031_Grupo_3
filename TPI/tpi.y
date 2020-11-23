@@ -65,6 +65,7 @@ int flagTipo;
 int contadorParametros;
 char* buscarFuncion;
 NODO* acumuladorParametros;
+int flagEsIdentificador = 3;
 
 %}
 
@@ -182,11 +183,11 @@ tipoDato:                TIPO_DE_DATO {tipoId = $<cadena>1; flagTipo=0;}
 ;                                                                       
 tipoFuncion:             TIPO_DE_FUNCION {tipoFun = $<cadena>1;flagTipo=1; /*El flag nos dice si es de algun tipo escpecial de funcion (void por ejemplo) o no */}
 ;
-num:         CTEDEC      
-            |CTEOCT
-            |CTEHEX
-            |CTEREAL
-            |CARACTER
+num:         CTEDEC      {}
+            |CTEOCT     {}
+            |CTEHEX     {}
+            |CTEREAL    {}
+            |CARACTER   {}
 ;   
        
 expresion: 		expAsignacion ';' {printf("ENCONTRE UNA EXPRESION\n");}
@@ -236,20 +237,20 @@ operUnario:     '&'
                 |'–' 
                 |'!'
 ;
-expPostfijo:	     expPrimaria                {$<cadena>$ = $<cadena>1;}
+expPostfijo:	     expPrimaria                                                                          {$<cadena>$ = $<cadena>1;}
                     |ID '[' expresionSelecc ']' 
                     |ID {buscarFuncion= $<cadena>1;} '(' listaArgumentos ')' validacionCantidadParametros {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}else {contadorParametros=0;}}
                     |ID {buscarFuncion= $<cadena>1;} '(' ')' validacionCantidadParametros                 {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}else {contadorParametros=0;}}
 ;
-listaArgumentos:    	 expPrimaria                            {contadorParametros++;InsertarAlPpio(&acumuladorParametros,"nada",tipoDeDatoLaEstructura($<cadena>1,listaVars,NULL,NULL),1);}
-	           		    |listaArgumentos ',' expPrimaria        {contadorParametros++;insertarAlFinal(&acumuladorParametros,"nada",tipoDeDatoLaEstructura($<cadena>3,listaVars,NULL,NULL),1);} 
+listaArgumentos:    	 expPrimaria                            {contadorParametros++; if(flagEsIdentificador){InsertarAlPpio(&acumuladorParametros,"nada",tipoDeDatoLaEstructura($<cadena>1,listaVars,NULL,NULL),1);} else {  printf("HOLAAAA: %d",flagEsIdentificador);InsertarAlPpio(&acumuladorParametros,"nada",$<cadena>1,1); } }
+	           		    |expPrimaria ',' listaArgumentos        {contadorParametros++; if(flagEsIdentificador){InsertarAlPpio(&acumuladorParametros,"nada",tipoDeDatoLaEstructura($<cadena>1,listaVars,NULL,NULL),1);} else { printf("HOLAAAA: %d",flagEsIdentificador);InsertarAlPpio(&acumuladorParametros,"nada",$<cadena>1,1); } } 
 ;
 validacionCantidadParametros:         /*vacio*/                 {if(contadorParametros != cantidadParametros(listaFunciones,buscarFuncion) ){ printf("ERROR SEMANTICO: PROBLEMA CON LA CANTIDAD DE PARAMETROS\n");} else if(contadorParametros!=0) {compararParametros(listaFunciones,buscarFuncion,acumuladorParametros);} acumuladorParametros = NULL;}  
 ;
                     
-expPrimaria:	   ID                                           {if(EstaLaVar(listaVars,$<cadena>1)==0){printf("ERROR, La variable %s NO esta declarada\n",$<cadena>1); $<cadena>$ = $<cadena>1;}}
-		          |num                                          {}
-		          |LITCAD
+expPrimaria:	   ID                                           {if(EstaLaVar(listaVars,$<cadena>1)==0){printf("ERROR, La variable %s NO esta declarada\n",$<cadena>1); flagEsIdentificador = 1;$<cadena>$ = $<cadena>1;}}
+		          |num                                          {flagEsIdentificador = 0;$<cadena>$ = $<cadena>1;}
+		          |LITCAD                                       {flagEsIdentificador = 0;$<cadena>$ = $<cadena>1;}
 		          |'(' expresionSelecc')'
 ;
 
@@ -466,7 +467,7 @@ void compararParametros(LISTADELISTAS* l, char* funcion,NODO* listaAComparar){
         if(strcmp(funcion,aux1->NombreFuncion)==0) {
             NODO* aux2 = listaAComparar;
             NODO* aux3 = aux1->Parametros;
-            while(aux2 != NULL) {
+            while(aux3 != NULL) {
                 if(strcmp(aux2->Tipo,aux3->Tipo)==0){
                     flag = 1;
                     
@@ -480,6 +481,7 @@ void compararParametros(LISTADELISTAS* l, char* funcion,NODO* listaAComparar){
                 aux2= aux2->sgte;
                 aux3= aux3->sgte;
             }
+            
         }
         aux1= aux1->sgte;
     }
