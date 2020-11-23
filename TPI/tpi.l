@@ -32,10 +32,10 @@ TIPO_FUNCION "void"|"void*"
 {TIPO_DATO}                            {yylval.cadena=strdup(yytext); return TIPO_DE_DATO;}
 {TIPO_FUNCION}                         {yylval.cadena=strdup(yytext); return TIPO_DE_FUNCION;}
 "sizeof"                               {return SIZEOF;}
-{CONSTANTE_DECIMAL}                    {yylval.nro =strtol(yytext,NULL,10);return CTEDEC;}
-{CONSTANTE_OCTAL}                      {yylval.nro =strtol(yytext,NULL,8);return CTEOCT;}
-{CONSTANTE_HEXADECIMAL}                {yylval.nro =strtol(yytext,NULL,16);return CTEHEX;}
-{CONSTANTE_REAL}                       {yylval.nro =atof(yytext);return CTEREAL;}
+{CONSTANTE_DECIMAL}                    {yylval.cadena = strdup("int");return CTEDEC;}
+{CONSTANTE_OCTAL}                      {yylval.cadena = strdup("int");return CTEOCT;}
+{CONSTANTE_HEXADECIMAL}                {yylval.cadena = strdup("int");return CTEHEX;}
+{CONSTANTE_REAL}                       {yylval.cadena = strdup("float");return CTEREAL;}
 "switch"                               {return SWITCH;}
 "case"                                 {return CASE;}
 "else"                                 {return ELSE;}
