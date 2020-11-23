@@ -53,6 +53,7 @@ int CantidadDeNodos(NODO*);
 int EstaLaFun(LISTADELISTAS*, char*);
 char* tipoDeDatoLaEstructura(char* ,NODO*, char*,LISTADELISTAS*);
 int cantidadParametros(LISTADELISTAS*, char*);
+void compararParametros(LISTADELISTAS*, char*,NODO*);
 
 NODO* listaVars = NULL;
 LISTADELISTAS* listaFunciones = NULL;
@@ -63,6 +64,8 @@ char* tipoFun;
 int flagTipo;
 int contadorParametros;
 char* buscarFuncion;
+NODO* acumuladorParametros;
+
 %}
 
 %token <nro> CTEDEC   
@@ -235,17 +238,17 @@ operUnario:     '&'
 ;
 expPostfijo:	     expPrimaria                {$<cadena>$ = $<cadena>1;}
                     |ID '[' expresionSelecc ']' 
-                    |ID {buscarFuncion= $<cadena>1;} '(' listaArgumentos ')' validacionCantidadParametros {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}contadorParametros=0;}
-                    |ID {buscarFuncion= $<cadena>1;} '(' ')' validacionCantidadParametros                 {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}contadorParametros=0;}
+                    |ID {buscarFuncion= $<cadena>1;} '(' listaArgumentos ')' validacionCantidadParametros {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}else {contadorParametros=0;}}
+                    |ID {buscarFuncion= $<cadena>1;} '(' ')' validacionCantidadParametros                 {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}else {contadorParametros=0;}}
 ;
-listaArgumentos:    	 expPrimaria                     {contadorParametros++;}
-	           		    |listaArgumentos ',' expPrimaria {contadorParametros++;}
+listaArgumentos:    	 expPrimaria                            {contadorParametros++;InsertarAlPpio(&acumuladorParametros,"nada",tipoDeDatoLaEstructura($<cadena>1,listaVars,NULL,NULL),1);}
+	           		    |listaArgumentos ',' expPrimaria        {contadorParametros++;insertarAlFinal(&acumuladorParametros,"nada",tipoDeDatoLaEstructura($<cadena>3,listaVars,NULL,NULL),1);} 
 ;
-validacionCantidadParametros:         /*vacio*/       {if(contadorParametros != cantidadParametros(listaFunciones,buscarFuncion) ){ printf("ERROR SEMANTICO: PROBLEMA CON LA CANTIDAD DE PARAMETROS\n");} } 
+validacionCantidadParametros:         /*vacio*/                 {if(contadorParametros != cantidadParametros(listaFunciones,buscarFuncion) ){ printf("ERROR SEMANTICO: PROBLEMA CON LA CANTIDAD DE PARAMETROS\n");} else if(contadorParametros!=0) {compararParametros(listaFunciones,buscarFuncion,acumuladorParametros);} acumuladorParametros = NULL;}  
 ;
                     
-expPrimaria:	   ID                       {if(EstaLaVar(listaVars,$<cadena>1)==0){printf("ERROR, La variable %s NO esta declarada\n",$<cadena>1); $<cadena>$ = $<cadena>1;}}
-		          |num                      {}
+expPrimaria:	   ID                                           {if(EstaLaVar(listaVars,$<cadena>1)==0){printf("ERROR, La variable %s NO esta declarada\n",$<cadena>1); $<cadena>$ = $<cadena>1;}}
+		          |num                                          {}
 		          |LITCAD
 		          |'(' expresionSelecc')'
 ;
@@ -455,6 +458,34 @@ int EstaLaVar(NODO*l, char* palabra){
         return 0;
         }
 }
+
+void compararParametros(LISTADELISTAS* l, char* funcion,NODO* listaAComparar){
+    LISTADELISTAS* aux1 = l;
+    int flag;
+    while(aux1 != NULL) {
+        if(strcmp(funcion,aux1->NombreFuncion)==0) {
+            NODO* aux2 = listaAComparar;
+            NODO* aux3 = aux1->Parametros;
+            while(aux2 != NULL) {
+                if(strcmp(aux2->Tipo,aux3->Tipo)==0){
+                    flag = 1;
+                    
+                } else{ 
+                    flag = 0;
+                    printf("ERROR SEMANTICO: SE ESPERABA UN PARAMETRO DE TIPO %s\n",aux3->Tipo);
+                    break;
+                    
+                }
+                
+                aux2= aux2->sgte;
+                aux3= aux3->sgte;
+            }
+        }
+        aux1= aux1->sgte;
+    }
+
+}
+
 int EstaLaFun(LISTADELISTAS*l, char* palabra){
     LISTADELISTAS* aux = l;
         if (aux== NULL) {
