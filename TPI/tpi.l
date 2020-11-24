@@ -49,8 +49,7 @@ TIPO_FUNCION "void"|"void*"
 "struct"                               {return STRUCT;}
 "union"                                {return UNION;}
 "typedef"                              {return TYPEDEF;}
-
-{IDENTIFICADOR}                        {yylval.cadena=strdup(yytext); return ID;}
+{IDENTIFICADOR}                        {yylval.cadena=strdup(yytext);return ID;}
 
       
 "="                     {return '=';}
