@@ -92,7 +92,7 @@ int flagEsIdentificador = 3;
 %token <cadena> TIPO_DE_FUNCION
 %token STRUCT UNION
 %token TYPEDEF
-
+%token ERRORLEXICO
 
 %type <cadena> identificador
 %type <cadena> listaIds
@@ -158,26 +158,26 @@ idONo:                  /*vacio*/
 funcionovar:             listaIds ';'
                         |funcion  
 ;
-funcion:                ID '(' listaParametros ')' sentenciaComp {if (flagTipo){insertarAlFinalLL(&listaFunciones,listaParametros2,tipoFun, $<cadena>1);} else { insertarAlFinalLL(&listaFunciones,listaParametros2,tipoId, $<cadena>1);listaParametros2=NULL;}}
+funcion:                ID '(' listaParametros ')' sentenciaComp {if (flagTipo){insertarAlFinalLL(&listaFunciones,listaParametros2,tipoFun, $<cadena>1);} else { insertarAlFinalLL(&listaFunciones,listaParametros2,tipoId, $<cadena>1);}listaParametros2=NULL;}
                         |prototipo 
 
 ;
-prototipo:              ID '(' listaParametros ')' ';' {if (flagTipo){insertarAlFinalLL(&listaFunciones,listaParametros2,tipoFun, $<cadena>1);} else { insertarAlFinalLL(&listaFunciones,listaParametros2,tipoId, $<cadena>1);listaParametros2=NULL;}}
+prototipo:              ID '(' listaParametros ')' ';' {if (flagTipo){insertarAlFinalLL(&listaFunciones,listaParametros2,tipoFun, $<cadena>1);} else { insertarAlFinalLL(&listaFunciones,listaParametros2,tipoId, $<cadena>1);}listaParametros2=NULL;}
 ;
 listaParametros:        /* vacio */
                         |parametroSuelto
                         |parametroSuelto',' listaParametros
 ;
 
-parametroSuelto:        TIPO_DE_DATO idONo     {insertarAlFinal(&listaParametros2,"sin parametro",$<cadena>1,1);}
+parametroSuelto:        TIPO_DE_DATO idONo     {insertarAlFinal(&listaParametros2,"nada",$<cadena>1,1);}
 ;
 listaIds:                identificador  
                         |identificador ',' listaIds
 
 ;
 
-identificador:           ID      { if(EstaLaVar(listaVars,$<cadena>1)) {printf("ERROR SEMANTICO: DOBLE DECLARACION DE LA VARIABLE: %s, en la linea:  %d",$<cadena>1,yylineno);} else {insertarAlFinal(&listaVars,$<cadena>1,tipoId,yylineno);} }    
-                        |ID '=' expresionSelecc { if(EstaLaVar(listaVars,$<cadena>1)) {printf("ERROR SEMANTICO: DOBLE DECLARACION DE LA VARIABLE: %s, en la linea: %d",$<cadena>1,yylineno);exit(1);} else {insertarAlFinal(&listaVars,$<cadena>1,tipoId,yylineno);} }
+identificador:           ID      { if(EstaLaVar(listaVars,$<cadena>1)) {printf("ERROR SEMANTICO: DOBLE DECLARACION DE LA VARIABLE: %s, en la linea:  %d\n",$<cadena>1,yylineno);} else {insertarAlFinal(&listaVars,$<cadena>1,tipoId,yylineno);} }    
+                        |ID '=' expresionSelecc { if(EstaLaVar(listaVars,$<cadena>1)) {printf("ERROR SEMANTICO: DOBLE DECLARACION DE LA VARIABLE: %s, en la linea: %d\n",$<cadena>1,yylineno);} else {insertarAlFinal(&listaVars,$<cadena>1,tipoId,yylineno);} }
 ;
 
 tipoDato:                TIPO_DE_DATO {tipoId = $<cadena>1; flagTipo=0;}
@@ -230,24 +230,26 @@ expMultiplicativa: 	 expUnaria                                   {}
 ;
 expUnaria:        	expPostfijo                                  {$<cadena>$ = $<cadena>1;}
                     |INCREMENTO expUnaria 
+                    |expUnaria INCREMENTO
                     |operUnario expUnaria 
                     |SIZEOF'('TIPO_DE_DATO')'
 ;
 operUnario:     '&' 
                 |'*' 
                 |'–' 
-                |'!'
+                |'!' 
 ;
 expPostfijo:	     expPrimaria                                                                          {$<cadena>$ = $<cadena>1;}
                     |ID '[' expresionSelecc ']'
                     |ID {buscarFuncion= $<cadena>1;acumuladorParametros = NULL;} '(' listaArgumentos ')' validacionCantidadParametros {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}else {contadorParametros=0;}}
-                    |ID {buscarFuncion= $<cadena>1;} '(' ')' validacionCantidadParametros                 {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}else {contadorParametros=0;}}
+                    |ID {buscarFuncion= $<cadena>1;acumuladorParametros = NULL;} '(' ')' validacionCantidadParametros                 {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}else {contadorParametros=0;}}
+
 ;
 listaArgumentos:    	 expPrimaria                            {contadorParametros++;}
 	           		    |listaArgumentos ',' expPrimaria        {contadorParametros++;} 
 ;
-validacionCantidadParametros:         /*vacio*/                 {if(contadorParametros != cantidadParametros(listaFunciones,buscarFuncion)){ printf("ERROR SEMANTICO: PROBLEMA CON LA CANTIDAD DE PARAMETROS\n");} 
-                                                                else if(contadorParametros!=0) {compararParametros(listaFunciones,buscarFuncion,acumuladorParametros);} acumuladorParametros = NULL;}  
+validacionCantidadParametros:         /*vacio*/                 {if (EstaLaFun(listaFunciones,buscarFuncion)){if(contadorParametros != cantidadParametros(listaFunciones,buscarFuncion)){ printf("ERROR SEMANTICO: PROBLEMA CON LA CANTIDAD DE PARAMETROS EN LA LINEA :%d\n",yylineno);} 
+                                                                else if(contadorParametros!=0) {compararParametros(listaFunciones,buscarFuncion,acumuladorParametros);} acumuladorParametros = NULL;} } 
 ;
                     
 expPrimaria:	   ID                                           {$<cadena>$ = $<cadena>1;if(EstaLaVar(listaVars,$<cadena>1)==0){printf("ERROR, La variable %s NO esta declarada\n",$<cadena>1);}insertarAlFinal(&acumuladorParametros,"nada",tipoDeDatoLaEstructura($<cadena>1,listaVars,NULL,NULL),1); }
@@ -286,11 +288,14 @@ sentenciaIteracion:   WHILE {printf("se encontro una sentencia WHILE en la linea
                     | DO {printf("se encontro una sentencia DO WHILE en la linea : %d \n", yylineno);} sentenciaComp WHILE '(' expresionSelecc ')' ';' 
                     | FOR {printf("se encontro una sentencia FOR en la linea : %d \n", yylineno);} sentenciaFor 
 ;
-sentenciaFor:       '(' expresionSelecc ';' expresionSelecc ';' expresionSelecc ')' sentenciaComp
+sentenciaFor:       '(' declararOexpr ';' expresionSelecc ';' expresionSelecc ')' sentenciaComp
                     |'('  ';'  ';'  ')' sentenciaComp
 
+;
 
-
+declararOexpr:      expresionSelecc
+                    |tipoDato identificador
+;
 %%
 
 int main ()
