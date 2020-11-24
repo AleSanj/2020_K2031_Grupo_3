@@ -225,7 +225,7 @@ expAditiva:    	 expMultiplicativa
                 |expAditiva '-' expMultiplicativa
 ;
 expMultiplicativa: 	 expUnaria                                   {}
-                    |expMultiplicativa '*' expUnaria             {if(strcmp(tipoDeDatoLaEstructura($<cadena>1,listaVars, NULL,NULL),tipoDeDatoLaEstructura($<cadena>3,listaVars,NULL,NULL))==0){}else {printf("ERROR SEMANTICO: LOS TIPOS SON INCOMPATIBLES en la linea %d\n", yylineno);}}
+                    |expMultiplicativa '*' expUnaria             {if(EstaLaVar(listaVars,$<cadena>3)){if(strcmp(tipoDeDatoLaEstructura($<cadena>1,listaVars, NULL,NULL),tipoDeDatoLaEstructura($<cadena>3,listaVars,NULL,NULL))==0){}else {printf("ERROR SEMANTICO: LOS TIPOS SON INCOMPATIBLES en la linea %d\n", yylineno);}}else{}}
                     |expMultiplicativa '/' expUnaria               
 ;
 expUnaria:        	expPostfijo                                  {$<cadena>$ = $<cadena>1;}
@@ -241,8 +241,8 @@ operUnario:     '&'
 ;
 expPostfijo:	     expPrimaria                                                                          {$<cadena>$ = $<cadena>1;}
                     |ID '[' expresionSelecc ']'
-                    |ID {buscarFuncion= $<cadena>1;acumuladorParametros = NULL;} '(' listaArgumentos ')' validacionCantidadParametros {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}else {contadorParametros=0;}}
-                    |ID {buscarFuncion= $<cadena>1;acumuladorParametros = NULL;} '(' ')' validacionCantidadParametros                 {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}else {contadorParametros=0;}}
+                    |ID {buscarFuncion= $<cadena>1;acumuladorParametros = NULL;} '(' listaArgumentos ')' validacionCantidadParametros {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR SEMANTICO: La funcion %s NO esta declarada en la linea: %d \n",$<cadena>1,yylineno);}else {contadorParametros=0;}}
+                    |ID {buscarFuncion= $<cadena>1;acumuladorParametros = NULL;} '(' ')' validacionCantidadParametros                 {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR SEMANTICO: La funcion %s NO esta declarada en la linea: %d \n",$<cadena>1,yylineno);}else {contadorParametros=0;}}
 
 ;
 listaArgumentos:    	 expPrimaria                            {contadorParametros++;}
@@ -252,7 +252,7 @@ validacionCantidadParametros:         /*vacio*/                 {if (EstaLaFun(l
                                                                 else if(contadorParametros!=0) {compararParametros(listaFunciones,buscarFuncion,acumuladorParametros);} acumuladorParametros = NULL;} } 
 ;
                     
-expPrimaria:	   ID                                           {$<cadena>$ = $<cadena>1;if(EstaLaVar(listaVars,$<cadena>1)==0){printf("ERROR, La variable %s NO esta declarada\n",$<cadena>1);}insertarAlFinal(&acumuladorParametros,"nada",tipoDeDatoLaEstructura($<cadena>1,listaVars,NULL,NULL),1); }
+expPrimaria:	   ID                                           {$<cadena>$ = $<cadena>1;if(EstaLaVar(listaVars,$<cadena>1)==0){printf("ERROR, La variable %s NO esta declarada en la linea:%d \n",$<cadena>1,yylineno);}insertarAlFinal(&acumuladorParametros,"nada",tipoDeDatoLaEstructura($<cadena>1,listaVars,NULL,NULL),1); }
 		          |num                                          {$<cadena>$ = $<cadena>1;insertarAlFinal(&acumuladorParametros,"nada",$<cadena>1,1);}
 		          |LITCAD                                       {$<cadena>$ = $<cadena>1;insertarAlFinal(&acumuladorParametros,"nada",$<cadena>1,1);}
 		          |'(' expresionSelecc')'                        
