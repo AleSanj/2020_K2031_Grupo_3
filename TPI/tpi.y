@@ -19,60 +19,59 @@ void yyerror (char *s){
 }
 
 %{
- typedef struct Nodo {
+ typedef struct TsVariables {
     char* Palabra;
     char* Tipo;
     int Linea; 
-    struct Nodo* sgte;
-}NODO;
+    struct TsVariables* sgte;
+}TSVARIABLES;
 
-typedef struct ListaDeListas{
-    NODO* Parametros;
+typedef struct TsFunciones{
+    TSVARIABLES* Parametros;
     char* TipoFuncion;
     char* NombreFuncion;
-    struct ListaDeListas* sgte;
+    struct TsFunciones* sgte;
 
-}LISTADELISTAS;
-
-
-NODO* CrearNodo(char*,char*,int);
-void RecorrerListaVariables(NODO*); 
-void RecorrerListaFunciones(NODO*); 
-int VerificarSiEstaVacia(NODO*);    
-int EstaLaVar(NODO*, char*);
-int EstaElElemento(NODO*, char*,char*);
-void InsertarAlPpio(NODO** , char*,char*,int);
-void insertarAlFinal(NODO**,char*,char*,int);
+}TSFUNCIONES;
 
 
-void recorrerLL(LISTADELISTAS*l);
-LISTADELISTAS* CrearNodoLL(NODO*,char*,char*);
-void insertarAlFinalLL(LISTADELISTAS**,NODO*, char*, char*);
-void RecorrerListaParametros(NODO*);
-int CantidadDeNodos(NODO*);
-int EstaLaFun(LISTADELISTAS*, char*);
-char* tipoDeDatoLaEstructura(char* ,NODO*, char*,LISTADELISTAS*);
-int cantidadParametros(LISTADELISTAS*, char*);
-void compararParametros(LISTADELISTAS*, char*,NODO*);
+TSVARIABLES* CrearNodo(char*,char*,int);
+void RecorrerListaVariables(TSVARIABLES*); 
+// void RecorrerListaFunciones(TSVARIABLES*); 
+int VerificarSiEstaVacia(TSVARIABLES*);    
+int EstaLaVar(TSVARIABLES*, char*);
+void InsertarAlPpio(TSVARIABLES** , char*,char*,int);
+void insertarAlFinal(TSVARIABLES**,char*,char*,int);
 
-NODO* listaVars = NULL;
-LISTADELISTAS* listaFunciones = NULL;
-NODO* listaParametros2 = NULL;
+
+void recorrerLL(TSFUNCIONES*l);
+TSFUNCIONES* CrearNodoLL(TSVARIABLES*,char*,char*);
+void insertarAlFinalLL(TSFUNCIONES**,TSVARIABLES*, char*, char*);
+void RecorrerListaParametros(TSVARIABLES*);
+int CantidadDeNodos(TSVARIABLES*);
+int EstaLaFun(TSFUNCIONES*, char*);
+char* tipoDeDatoLaEstructura(char* ,TSVARIABLES*, char*,TSFUNCIONES*);
+int cantidadParametros(TSFUNCIONES*, char*);
+void compararParametros(TSFUNCIONES*, char*,TSVARIABLES*);
+
+TSVARIABLES* listaVars = NULL;
+TSFUNCIONES* listaFunciones = NULL;
+TSVARIABLES* listaParametros2 = NULL;
 char* tipoId;
 char* tipoFun;
 
 int flagTipo;
 int contadorParametros;
 char* buscarFuncion;
-NODO* acumuladorParametros;
+TSVARIABLES* acumuladorParametros;
 int flagEsIdentificador = 3;
 
 %}
 
-%token <nro> CTEDEC   
-%token <nro> CTEOCT
-%token <nro> CTEHEX
-%token <nrocoma> CTEREAL
+%token <cadena> CTEDEC   
+%token <cadena> CTEOCT
+%token <cadena> CTEHEX
+%token <cadena> CTEREAL
 %token <cadena> ID
 %token <cadena> TIPO_DE_DATO
 %token <cadena>  SIZEOF
@@ -106,7 +105,7 @@ int flagEsIdentificador = 3;
 %%
 
 
-input:      
+input:                  
                         |input line
 ;
 line:                   '\n'
@@ -116,7 +115,8 @@ line:                   '\n'
 ;
 
 sentencia:      /* vacio */
-                |';' 
+                |'\n'
+                |';'
                 |declaracion
                 |sentenciaComp
                 |sentenciaSeleccion 
@@ -191,7 +191,7 @@ num:         CTEDEC      {$<cadena>$ = $<cadena>1}
             |CARACTER    {$<cadena>$ = $<cadena>1}
 ;   
        
-expresion: 		expAsignacion ';' {printf("ENCONTRE UNA EXPRESION\n");}
+expresion: 		expAsignacion ';' {}
 ;
 expresionSelecc: expAsignacion {} 
 ;
@@ -224,8 +224,8 @@ expAditiva:    	 expMultiplicativa
                 |expAditiva '+' expMultiplicativa
                 |expAditiva '-' expMultiplicativa
 ;
-expMultiplicativa: 	 expUnaria                                   {printf("wa:%s \n",$<cadena>1);}
-                    |expMultiplicativa '*' expUnaria             {printf("1:%s y 3:%s \n",$<cadena>1,$<cadena>3);if(strcmp(tipoDeDatoLaEstructura($<cadena>1,listaVars, NULL,NULL),tipoDeDatoLaEstructura($<cadena>3,listaVars,NULL,NULL))==0){}else {printf("ERROR SEMANTICO: LOS TIPOS SON INCOMPATIBLES en la linea %d\n", yylineno);}}
+expMultiplicativa: 	 expUnaria                                   {}
+                    |expMultiplicativa '*' expUnaria             {if(strcmp(tipoDeDatoLaEstructura($<cadena>1,listaVars, NULL,NULL),tipoDeDatoLaEstructura($<cadena>3,listaVars,NULL,NULL))==0){}else {printf("ERROR SEMANTICO: LOS TIPOS SON INCOMPATIBLES en la linea %d\n", yylineno);}}
                     |expMultiplicativa '/' expUnaria               
 ;
 expUnaria:        	expPostfijo                                  {$<cadena>$ = $<cadena>1;}
@@ -246,7 +246,8 @@ expPostfijo:	     expPrimaria                                                   
 listaArgumentos:    	 expPrimaria                            {contadorParametros++;}
 	           		    |listaArgumentos ',' expPrimaria        {contadorParametros++;} 
 ;
-validacionCantidadParametros:         /*vacio*/                 {RecorrerListaVariables(acumuladorParametros);if(contadorParametros != cantidadParametros(listaFunciones,buscarFuncion)){ printf("ERROR SEMANTICO: PROBLEMA CON LA CANTIDAD DE PARAMETROS\n");} else if(contadorParametros!=0) {compararParametros(listaFunciones,buscarFuncion,acumuladorParametros);} acumuladorParametros = NULL;}  
+validacionCantidadParametros:         /*vacio*/                 {if(contadorParametros != cantidadParametros(listaFunciones,buscarFuncion)){ printf("ERROR SEMANTICO: PROBLEMA CON LA CANTIDAD DE PARAMETROS\n");} 
+                                                                else if(contadorParametros!=0) {compararParametros(listaFunciones,buscarFuncion,acumuladorParametros);} acumuladorParametros = NULL;}  
 ;
                     
 expPrimaria:	   ID                                           {$<cadena>$ = $<cadena>1;if(EstaLaVar(listaVars,$<cadena>1)==0){printf("ERROR, La variable %s NO esta declarada\n",$<cadena>1);}insertarAlFinal(&acumuladorParametros,"nada",tipoDeDatoLaEstructura($<cadena>1,listaVars,NULL,NULL),1); }
@@ -282,7 +283,7 @@ sentenciaCorte:     /*vacio*/
 
 ;
 sentenciaIteracion:   WHILE {printf("se encontro una sentencia WHILE en la linea : %d \n", yylineno);} '(' expresionSelecc ')' sentenciaComp 
-                    | DO  {printf("se encontro una sentencia DO WHILE en la linea : %d \n", yylineno);} sentenciaComp WHILE '(' expresionSelecc ')' ';' 
+                    | DO {printf("se encontro una sentencia DO WHILE en la linea : %d \n", yylineno);} sentenciaComp WHILE '(' expresionSelecc ')' ';' 
                     | FOR {printf("se encontro una sentencia FOR en la linea : %d \n", yylineno);} sentenciaFor 
 ;
 sentenciaFor:       '(' expresionSelecc ';' expresionSelecc ';' expresionSelecc ')' sentenciaComp
@@ -305,28 +306,28 @@ int main ()
   return flag;
 }
 
-NODO* CrearNodo(char* palabra,char* tipo,int linea) {
-    NODO* nuevo_nodo = NULL;
-    nuevo_nodo = (NODO*) malloc(sizeof(NODO));
+TSVARIABLES* CrearNodo(char* palabra,char* tipo,int linea) {
+    TSVARIABLES* nuevo_nodo = NULL;
+    nuevo_nodo = (TSVARIABLES*) malloc(sizeof(TSVARIABLES));
     nuevo_nodo->Palabra = strdup(palabra);
     nuevo_nodo->Tipo = strdup(tipo);
     nuevo_nodo->Linea = linea;
     nuevo_nodo->sgte = NULL;    
 }
 
-LISTADELISTAS* CrearNodoLL(NODO* lista, char* tipoFuncion, char* nombreFuncion){
-    LISTADELISTAS* nuevo_nodo = NULL;
-    nuevo_nodo = (LISTADELISTAS*) malloc(sizeof(LISTADELISTAS));
+TSFUNCIONES* CrearNodoLL(TSVARIABLES* lista, char* tipoFuncion, char* nombreFuncion){
+    TSFUNCIONES* nuevo_nodo = NULL;
+    nuevo_nodo = (TSFUNCIONES*) malloc(sizeof(TSFUNCIONES));
     nuevo_nodo->Parametros= lista;
     nuevo_nodo->TipoFuncion = tipoFuncion;
     nuevo_nodo->NombreFuncion = nombreFuncion;
     nuevo_nodo->sgte = NULL;   
 
 }
-void insertarAlFinalLL(LISTADELISTAS** ldel,NODO* lista ,char* tipoFuncion, char* nombreFuncion){
-    LISTADELISTAS* nuevo_nodo = NULL;
+void insertarAlFinalLL(TSFUNCIONES** ldel,TSVARIABLES* lista ,char* tipoFuncion, char* nombreFuncion){
+    TSFUNCIONES* nuevo_nodo = NULL;
     nuevo_nodo = CrearNodoLL(lista,tipoFuncion,nombreFuncion);
-    LISTADELISTAS* aux1 =*ldel;
+    TSFUNCIONES* aux1 =*ldel;
     if (*ldel==NULL) {
         nuevo_nodo->sgte=NULL;
         *ldel=nuevo_nodo;
@@ -345,8 +346,8 @@ void insertarAlFinalLL(LISTADELISTAS** ldel,NODO* lista ,char* tipoFuncion, char
 }
 
 
-void recorrerLL(LISTADELISTAS*l) {
-        LISTADELISTAS*aux1 = l;
+void recorrerLL(TSFUNCIONES*l) {
+        TSFUNCIONES*aux1 = l;
         printf("\n----LISTA DE FUNCIONES---- \n");
         while (aux1 != NULL) {     
         printf("\nNOMBRE DE LA FUNCION: %s \n",aux1->NombreFuncion);
@@ -358,8 +359,8 @@ void recorrerLL(LISTADELISTAS*l) {
 }
 
 
-void RecorrerListaParametros(NODO *l) {
-    NODO *aux = l;
+void RecorrerListaParametros(TSVARIABLES *l) {
+    TSVARIABLES *aux = l;
     printf("Cantidad de parametros: %d\n",CantidadDeNodos(aux));
 
     while (aux != NULL) {
@@ -367,8 +368,8 @@ void RecorrerListaParametros(NODO *l) {
         aux = aux->sgte; 
     }
 }
-int cantidadParametros (LISTADELISTAS*l, char* funcion){
-    LISTADELISTAS* aux = l;
+int cantidadParametros (TSFUNCIONES*l, char* funcion){
+    TSFUNCIONES* aux = l;
     while(aux != NULL){
         if(strcmp(funcion,aux->NombreFuncion)==0){
             return (CantidadDeNodos(aux->Parametros));
@@ -377,9 +378,9 @@ int cantidadParametros (LISTADELISTAS*l, char* funcion){
     }
 }
 
-int CantidadDeNodos(NODO*l){
+int CantidadDeNodos(TSVARIABLES*l){
     int cantidad = 0;
-    NODO* aux = l;
+    TSVARIABLES* aux = l;
     while (aux != NULL) {
         cantidad++;
         aux = aux->sgte; 
@@ -388,9 +389,9 @@ int CantidadDeNodos(NODO*l){
 
 }
 
-char* tipoDeDatoLaEstructura(char* Variable,NODO*listaV, char* Funcion,LISTADELISTAS* listaF){
+char* tipoDeDatoLaEstructura(char* Variable,TSVARIABLES*listaV, char* Funcion,TSFUNCIONES* listaF){
         if (Variable != NULL) {
-            NODO* aux = listaV;
+            TSVARIABLES* aux = listaV;
             while(aux!= NULL ){
                 if(strcmp(aux->Palabra,Variable) == 0) {
                     return (aux->Tipo);
@@ -399,7 +400,7 @@ char* tipoDeDatoLaEstructura(char* Variable,NODO*listaV, char* Funcion,LISTADELI
 
             }
         } else {
-            LISTADELISTAS* aux = listaF;
+            TSFUNCIONES* aux = listaF;
 
             while(aux != NULL ){
                 if(strcmp(aux->NombreFuncion,Funcion) == 0) {
@@ -415,24 +416,24 @@ char* tipoDeDatoLaEstructura(char* Variable,NODO*listaV, char* Funcion,LISTADELI
 }
 
 
-int VerificarSiEstaVacia(NODO* l){
+int VerificarSiEstaVacia(TSVARIABLES* l){
     if (l == NULL){
     return 1;
     } else {
         return 0;
     }
     }
-void InsertarAlPpio(NODO** l, char* palabra,char* tipo,int linea){
-    NODO* nuevo_nodo = NULL;
+void InsertarAlPpio(TSVARIABLES** l, char* palabra,char* tipo,int linea){
+    TSVARIABLES* nuevo_nodo = NULL;
     nuevo_nodo = CrearNodo(palabra,tipo,linea);
     nuevo_nodo->sgte = *l;
     *l = nuevo_nodo;
 
 }
-void insertarAlFinal(NODO** l,char* palabra,char* tipo,int linea){
-    NODO* nuevo_nodo = NULL;
+void insertarAlFinal(TSVARIABLES** l,char* palabra,char* tipo,int linea){
+    TSVARIABLES* nuevo_nodo = NULL;
     nuevo_nodo = CrearNodo(palabra,tipo,linea);
-    NODO* aux1 = *l;
+    TSVARIABLES* aux1 = *l;
     if (aux1 != NULL){
 
     while(aux1->sgte != NULL ){
@@ -445,8 +446,8 @@ void insertarAlFinal(NODO** l,char* palabra,char* tipo,int linea){
     }
 }
 
-int EstaLaVar(NODO*l, char* palabra){
-    NODO* aux = l;
+int EstaLaVar(TSVARIABLES*l, char* palabra){
+    TSVARIABLES* aux = l;
         if (VerificarSiEstaVacia(aux)){
             return 0;
         } else {
@@ -461,13 +462,13 @@ int EstaLaVar(NODO*l, char* palabra){
         }
 }
 
-void compararParametros(LISTADELISTAS* l, char* funcion,NODO* listaAComparar){
-    LISTADELISTAS* aux1 = l;
+void compararParametros(TSFUNCIONES* l, char* funcion,TSVARIABLES* listaAComparar){
+    TSFUNCIONES* aux1 = l;
     int flag;
     while(aux1 != NULL) {
         if(strcmp(funcion,aux1->NombreFuncion)==0) {
-            NODO* aux2 = listaAComparar;
-            NODO* aux3 = aux1->Parametros;
+            TSVARIABLES* aux2 = listaAComparar;
+            TSVARIABLES* aux3 = aux1->Parametros;
             while(aux3 != NULL) {
                 if(strcmp(aux2->Tipo,aux3->Tipo)==0){
                     flag = 1;
@@ -489,8 +490,8 @@ void compararParametros(LISTADELISTAS* l, char* funcion,NODO* listaAComparar){
 
 }
 
-int EstaLaFun(LISTADELISTAS*l, char* palabra){
-    LISTADELISTAS* aux = l;
+int EstaLaFun(TSFUNCIONES*l, char* palabra){
+    TSFUNCIONES* aux = l;
         if (aux== NULL) {
             return 0;
         } else {
@@ -506,21 +507,8 @@ int EstaLaFun(LISTADELISTAS*l, char* palabra){
         
 }
 
-
-int EstaElElemento(NODO*l, char* palabra,char* tipo){
-    NODO* aux = l;
-        do {
-            if((strcmp(aux->Palabra,palabra) == 0) && (strcmp(aux->Tipo,tipo)== 0)){
-                return 1;
-            } 
-            aux = aux->sgte;
-        } while (aux != NULL);
-        
-        return 0;
-}
-
-void RecorrerListaVariables(NODO *l) {
-    NODO *aux = l;
+void RecorrerListaVariables(TSVARIABLES *l) {
+    TSVARIABLES *aux = l;
     printf("---- LISTA DE VARIABLES ----\n");
     while (aux != NULL) {
         printf("se declaro la variable \"%s\", de tipo %s, en la linea: %d \n",aux->Palabra,aux->Tipo,aux->Linea);
@@ -528,8 +516,8 @@ void RecorrerListaVariables(NODO *l) {
     }
 }
 
-void RecorrerListaFunciones(NODO *l) {
-    NODO *aux = l;
+void RecorrerListaFunciones(TSVARIABLES *l) {
+    TSVARIABLES *aux = l;
     printf("---- LISTA DE FUNCIONES ----\n");
     while (aux != NULL) {
         printf("se declaro la funcion \"%s\", de tipo %s, en la linea: %d \n",aux->Palabra,aux->Tipo,aux->Linea);
