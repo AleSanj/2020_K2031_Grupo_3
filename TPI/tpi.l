@@ -5,8 +5,6 @@
 %{
     #include "tpi.tab.h"
     #include <string.h>
-
-    int numeroLinea = 1;
 %}
 COMENTARIO_LINEA "//".*
 COMENTARIO_MULTIPLE \/\*(\*+[^\*\/]|[^\*])*\*+\/
@@ -27,8 +25,8 @@ TIPO_FUNCION "void"|"void*"
 
 {COMENTARIO_LINEA}                     {}
 {COMENTARIO_MULTIPLE}                  {}
-{CARACTER_SIMPLE}                      {return CARACTER;}
-{LITERAL_CADENA}                       {return LITCAD;}
+{CARACTER_SIMPLE}                      {yylval.cadena=strdup("char");return CARACTER;}
+{LITERAL_CADENA}                       {yylval.cadena=strdup("char*");return LITCAD;}
 {TIPO_DATO}                            {yylval.cadena=strdup(yytext); return TIPO_DE_DATO;}
 {TIPO_FUNCION}                         {yylval.cadena=strdup(yytext); return TIPO_DE_FUNCION;}
 "sizeof"                               {return SIZEOF;}
@@ -45,7 +43,7 @@ TIPO_FUNCION "void"|"void*"
 "if"                                   {return IF;}
 "do"                                   {return DO;}
 "for"                                  {return FOR;}
-"while"                                {yylval.cadena = yytext;return WHILE;}
+"while"                                {yylval.cadena =strdup(yytext);return WHILE;}
 "struct"                               {return STRUCT;}
 "union"                                {return UNION;}
 "typedef"                              {return TYPEDEF;}
@@ -81,7 +79,7 @@ TIPO_FUNCION "void"|"void*"
 \n                      {return '\n';}
 " "                     {}
 \t                      {}
-.                       {printf("ERROR LEXICO: %s, EN LINEA: %d \n",yytext,yylineno);}
+.                       {printf("ERROR LEXICO: %s, EN LINEA: %d \n",yytext,yylineno);return ERRORLEXICO;}
 
 %%
 
