@@ -99,6 +99,7 @@ int flagEsIdentificador = 3;
 %type <cadena> listaIds
 %type <cadena> tipoDato
 %type <cadena> sentenciaSeleccion
+%type <cadena> num
 
 
 
@@ -183,11 +184,11 @@ tipoDato:                TIPO_DE_DATO {tipoId = $<cadena>1; flagTipo=0;}
 ;                                                                       
 tipoFuncion:             TIPO_DE_FUNCION {tipoFun = $<cadena>1;flagTipo=1; /*El flag nos dice si es de algun tipo escpecial de funcion (void por ejemplo) o no */}
 ;
-num:         CTEDEC      {}
-            |CTEOCT     {}
-            |CTEHEX     {}
-            |CTEREAL    {}
-            |CARACTER   {}
+num:         CTEDEC      {$<cadena>$ = $<cadena>1}
+            |CTEOCT      {$<cadena>$ = $<cadena>1}
+            |CTEHEX      {$<cadena>$ = $<cadena>1}
+            |CTEREAL     {$<cadena>$ = $<cadena>1}
+            |CARACTER    {$<cadena>$ = $<cadena>1}
 ;   
        
 expresion: 		expAsignacion ';' {printf("ENCONTRE UNA EXPRESION\n");}
@@ -238,21 +239,21 @@ operUnario:     '&'
                 |'!'
 ;
 expPostfijo:	     expPrimaria                                                                          {$<cadena>$ = $<cadena>1;}
-                    |ID '[' expresionSelecc ']' 
-                    |ID {buscarFuncion= $<cadena>1;} '(' listaArgumentos ')' validacionCantidadParametros {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}else {contadorParametros=0;}}
+                    |ID '[' expresionSelecc ']'
+                    |ID {buscarFuncion= $<cadena>1;acumuladorParametros = NULL;} '(' listaArgumentos ')' validacionCantidadParametros {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}else {contadorParametros=0;}}
                     |ID {buscarFuncion= $<cadena>1;} '(' ')' validacionCantidadParametros                 {if(EstaLaFun(listaFunciones,$<cadena>1)==0){printf("ERROR, La funcion %s NO esta declarada\n",$<cadena>1);}else {contadorParametros=0;}}
 ;
-listaArgumentos:    	 expPrimaria                            {contadorParametros++; if(flagEsIdentificador){InsertarAlPpio(&acumuladorParametros,"nada",tipoDeDatoLaEstructura($<cadena>1,listaVars,NULL,NULL),1);} else {  printf("HOLAAAA: %d",flagEsIdentificador);InsertarAlPpio(&acumuladorParametros,"nada",$<cadena>1,1); } }
-	           		    |expPrimaria ',' listaArgumentos        {contadorParametros++; if(flagEsIdentificador){InsertarAlPpio(&acumuladorParametros,"nada",tipoDeDatoLaEstructura($<cadena>1,listaVars,NULL,NULL),1);} else { printf("HOLAAAA: %d",flagEsIdentificador);InsertarAlPpio(&acumuladorParametros,"nada",$<cadena>1,1); } } 
+listaArgumentos:    	 expPrimaria                            {contadorParametros++;}
+	           		    |listaArgumentos ',' expPrimaria        {contadorParametros++;} 
 ;
-validacionCantidadParametros:         /*vacio*/                 {if(contadorParametros != cantidadParametros(listaFunciones,buscarFuncion) ){ printf("ERROR SEMANTICO: PROBLEMA CON LA CANTIDAD DE PARAMETROS\n");} else if(contadorParametros!=0) {compararParametros(listaFunciones,buscarFuncion,acumuladorParametros);} acumuladorParametros = NULL;}  
+validacionCantidadParametros:         /*vacio*/                 {RecorrerListaVariables(acumuladorParametros);if(contadorParametros != cantidadParametros(listaFunciones,buscarFuncion)){ printf("ERROR SEMANTICO: PROBLEMA CON LA CANTIDAD DE PARAMETROS\n");} else if(contadorParametros!=0) {compararParametros(listaFunciones,buscarFuncion,acumuladorParametros);} acumuladorParametros = NULL;}  
 ;
                     
-expPrimaria:	   ID                                           {if(EstaLaVar(listaVars,$<cadena>1)==0){printf("ERROR, La variable %s NO esta declarada\n",$<cadena>1); flagEsIdentificador = 1;$<cadena>$ = $<cadena>1;}}
-		          |num                                          {flagEsIdentificador = 0;$<cadena>$ = $<cadena>1;}
-		          |LITCAD                                       {flagEsIdentificador = 0;$<cadena>$ = $<cadena>1;}
-		          |'(' expresionSelecc')'
-;
+expPrimaria:	   ID                                           {$<cadena>$ = $<cadena>1;if(EstaLaVar(listaVars,$<cadena>1)==0){printf("ERROR, La variable %s NO esta declarada\n",$<cadena>1);}insertarAlFinal(&acumuladorParametros,"nada",tipoDeDatoLaEstructura($<cadena>1,listaVars,NULL,NULL),1); }
+		          |num                                          {$<cadena>$ = $<cadena>1;insertarAlFinal(&acumuladorParametros,"nada",$<cadena>1,1);}
+		          |LITCAD                                       {$<cadena>$ = $<cadena>1;insertarAlFinal(&acumuladorParametros,"nada",$<cadena>1,1);}
+		          |'(' expresionSelecc')'                        
+;                                               
 
 
 sentenciaComp:   '{' listaSentencias '}' 
